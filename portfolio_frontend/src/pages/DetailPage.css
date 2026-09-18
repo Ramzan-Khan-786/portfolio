@@ -1,0 +1,12 @@
+.detail-page {
+  overflow-wrap: anywhere;
+}
+.detail-cover {
+  width: 100%;
+  max-height: 560px;
+  object-fit: contain;
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+  background: #edf0ea;
+  margin: 2rem 0;
+}

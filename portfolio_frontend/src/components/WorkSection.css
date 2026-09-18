@@ -1,0 +1,131 @@
+.project-list {
+  border-top: 1px solid #cfd5ce;
+}
+.project-row {
+  display: grid;
+  grid-template-columns: 70px minmax(0, 1fr) 105px;
+  gap: 1.3rem;
+  padding: 1.5rem 0.25rem;
+  border-bottom: 1px solid #d9ddd6;
+  transition:
+    background 0.2s ease,
+    padding 0.2s ease;
+}
+.project-row:hover {
+  background: #eff1ed;
+  padding-inline: 0.8rem;
+}
+.project-index {
+  padding-top: 0.35rem;
+  color: #829087;
+  font:
+    0.7rem 'JetBrains Mono',
+    monospace;
+}
+.project-title-line {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+.project-title-line h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 650;
+  letter-spacing: -0.035em;
+}
+.project-main > p {
+  max-width: 650px;
+  margin: 0.55rem 0 1rem;
+  color: #59645c;
+  line-height: 1.5;
+}
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.38rem;
+}
+.tag-list span {
+  border: 1px solid #d0d6cf;
+  border-radius: 999px;
+  padding: 0.25rem 0.5rem;
+  color: #647067;
+  font:
+    0.67rem 'JetBrains Mono',
+    monospace;
+}
+.status {
+  border-radius: 999px;
+  padding: 0.22rem 0.46rem;
+  background: #e7eee7;
+  color: #417052;
+  font:
+    600 0.64rem 'JetBrains Mono',
+    monospace;
+  text-transform: uppercase;
+}
+.status-in-progress {
+  background: #f7eadc;
+  color: #9b653d;
+}
+.status-archived {
+  background: #ededeb;
+  color: #777;
+}
+.project-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: space-between;
+  color: #7b867e;
+  font:
+    0.73rem 'JetBrains Mono',
+    monospace;
+}
+.project-links {
+  display: flex;
+  gap: 0.65rem;
+}
+.project-links a {
+  color: #294a3b;
+  transition: transform 0.18s ease;
+}
+.project-links a:hover {
+  transform: translate(2px, -2px);
+}
+@media (max-width: 650px) {
+  .project-row {
+    grid-template-columns: 34px minmax(0, 1fr);
+    gap: 0.8rem;
+  }
+  .project-meta {
+    grid-column: 2;
+    flex-direction: row;
+    align-items: center;
+  }
+  .project-row:hover {
+    padding-inline: 0.25rem;
+  }
+  .project-title-line {
+    flex-wrap: wrap;
+  }
+}
+.project-cover {
+  width: min(100%, 520px);
+  max-height: 220px;
+  object-fit: cover;
+  border-radius: 0.4rem;
+  margin-bottom: 1.2rem;
+}
+.project-title-line h3 a {
+  text-decoration: none;
+}
+.project-title-line h3 a:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.project-links a {
+  display: inline-grid;
+  place-items: center;
+  min-width: 44px;
+  min-height: 44px;
+}

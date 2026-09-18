@@ -1,0 +1,25 @@
+{
+  "name": "ramzan-khan-engineering-portfolio",
+  "private": true,
+  "version": "1.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently \"npm --prefix portfolio_backend run dev\" \"npm --prefix portfolio_frontend run dev\"",
+    "test": "npm --prefix portfolio_backend test && npm --prefix portfolio_frontend test",
+    "build": "npm --prefix portfolio_frontend run build",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test:e2e": "playwright test"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "eslint": "^9.39.0",
+    "@eslint/js": "^9.39.0",
+    "globals": "^16.0.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react": "^7.37.0",
+    "prettier": "^3.6.0",
+    "@playwright/test": "^1.56.0"
+  }
+}

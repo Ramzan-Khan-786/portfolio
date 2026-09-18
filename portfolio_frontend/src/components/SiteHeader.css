@@ -1,0 +1,111 @@
+.site-header {
+  position: sticky;
+  z-index: 30;
+  top: 0;
+  border-bottom: 1px solid var(--line);
+  background: #f7f7f4f5;
+  backdrop-filter: blur(12px);
+}
+.header-inner {
+  display: flex;
+  min-height: 72px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+.identity {
+  display: inline-flex;
+  min-width: 0;
+  flex-shrink: 0;
+  max-width: 55%;
+  align-items: center;
+  gap: 0.7rem;
+  text-decoration: none;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  font-size: 0.93rem;
+}
+.identity > span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.identity-mark {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 8px;
+  object-fit: cover;
+  background: var(--accent);
+  color: white;
+  font:
+    600 0.7rem ui-monospace,
+    monospace;
+}
+.desktop-nav {
+  display: flex;
+  overflow-x: auto;
+  gap: 0.9rem;
+  align-items: center;
+  min-width: 0;
+  scrollbar-width: thin;
+}
+.desktop-nav a,
+.mobile-nav a {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  color: #566a5d;
+  font-size: 0.84rem;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: color 0.18s;
+}
+.desktop-nav a:hover,
+.mobile-nav a:hover,
+.desktop-nav a[aria-current],
+.mobile-nav a[aria-current] {
+  color: #172219;
+}
+.desktop-nav a[aria-current] {
+  text-decoration: underline;
+  text-underline-offset: 8px;
+}
+.menu-trigger {
+  display: none;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 0.4rem;
+}
+.mobile-nav {
+  display: none;
+}
+@media (max-width: 900px) {
+  .desktop-nav {
+    display: none;
+  }
+  .menu-trigger {
+    display: grid;
+  }
+  .identity {
+    max-width: calc(100% - 60px);
+  }
+  .mobile-nav {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.25rem 1rem;
+    padding-block: 0.75rem;
+    border-top: 1px solid var(--line);
+    max-height: 65dvh;
+    overflow-y: auto;
+  }
+  .mobile-nav a {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+}

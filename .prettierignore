@@ -1,0 +1,9 @@
+node_modules
+**/node_modules
+**/dist
+**/coverage
+**/package-lock.json
+**/.env*
+artifacts
+test-results
+playwright-report

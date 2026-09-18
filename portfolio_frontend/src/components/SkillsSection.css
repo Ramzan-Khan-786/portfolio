@@ -1,0 +1,61 @@
+.skill-matrix {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-top: 1px solid #d9ddd6;
+  border-left: 1px solid #d9ddd6;
+}
+.skill-group {
+  min-height: 210px;
+  border-right: 1px solid #d9ddd6;
+  border-bottom: 1px solid #d9ddd6;
+  padding: 1.35rem;
+}
+.skill-group h3 {
+  margin: 0 0 1.2rem;
+  color: #6a756c;
+  font:
+    600 0.69rem 'JetBrains Mono',
+    monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.skill-group ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.skill-group li {
+  margin-top: 0.8rem;
+}
+.skill-group li span {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+.skill-group li small {
+  display: block;
+  margin-top: 0.1rem;
+  color: #738077;
+  font-size: 0.73rem;
+}
+@media (max-width: 760px) {
+  .skill-matrix {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .skill-group {
+    min-height: 185px;
+  }
+}
+@media (max-width: 460px) {
+  .skill-matrix {
+    display: block;
+    border-left: 0;
+  }
+  .skill-group {
+    min-height: auto;
+    border-left: 1px solid #d9ddd6;
+  }
+  .skill-group li:last-child {
+    margin-bottom: 0.2rem;
+  }
+}

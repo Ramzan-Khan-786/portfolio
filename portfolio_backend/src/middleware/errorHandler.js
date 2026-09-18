@@ -1,0 +1,36 @@
+import { ApiError } from '../utils/ApiError.js';
+export function notFound(_req, _res, next) {
+  next(new ApiError(404, 'This API route does not exist.'));
+}
+export function errorHandler(error, _req, res, _next) {
+  let status = 500;
+  let message = 'The service could not complete this request. Please try again.';
+  if (error instanceof ApiError) {
+    status = error.statusCode;
+    message = error.message;
+  } else if (error.code === 11000) {
+    status = 409;
+    message = 'That slug or key already exists.';
+  } else if (error.name === 'CastError') {
+    status = 400;
+    message = 'Invalid record identifier.';
+  } else if (error.name === 'ValidationError') {
+    status = 422;
+    message = 'The record contains invalid fields.';
+  } else if (error.type === 'entity.parse.failed') {
+    status = 400;
+    message = 'Request body must be valid JSON.';
+  } else if (error.type === 'entity.too.large') {
+    status = 413;
+    message = 'Request body is too large.';
+  }
+  if (status >= 500 && process.env.NODE_ENV !== 'test')
+    console.error('API request failed:', error.name);
+  res.status(status).json({
+    ok: false,
+    error: {
+      message,
+      ...(error instanceof ApiError && error.details ? { details: error.details } : {}),
+    },
+  });
+}
