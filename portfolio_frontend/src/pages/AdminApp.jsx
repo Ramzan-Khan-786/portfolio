@@ -1,7 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { CheckCircle2, LogOut, Menu, X } from 'lucide-react';
-import { apiClient } from '../lib/api.js';
+import { useAuth } from '../context/AuthContext.jsx';
+import ThemeSelector from '../components/ThemeSelector.jsx';
+import ContentEditor from '../features/admin/ContentEditor.jsx';
+import ResumeEditor from '../features/admin/ResumeEditor.jsx';
+import UsersPanel from '../features/admin/UsersPanel.jsx';
+import Operations from '../features/admin/Operations.jsx';
+import { contentModules } from '../features/admin/sectionConfig.js';
 import { resources, sections } from '../features/admin/config.js';
 import Login from '../features/admin/Login.jsx';
 import Dashboard from '../features/admin/Dashboard.jsx';
@@ -97,6 +103,9 @@ function Workspace({ user, logout }) {
             <X size={19} />
           </button>
         </div>
+        <div className="cms-theme">
+          <ThemeSelector />
+        </div>
         <nav className="my-8 grid gap-1" aria-label="CMS navigation">
           {sections.map(([key, label]) => (
             <NavLink
@@ -147,10 +156,23 @@ function Workspace({ user, logout }) {
         <main className="cms-content">
           {section === 'dashboard' ? (
             <Dashboard />
-          ) : section === 'profile' ? (
+          ) : section === 'identity' ? (
             <ProfileEditor notify={notify} />
           ) : section === 'account' ? (
             <Account notify={notify} />
+          ) : contentModules[section] ? (
+            <ContentEditor
+              key={section}
+              section={section}
+              config={contentModules[section]}
+              notify={notify}
+            />
+          ) : section === 'resume' ? (
+            <ResumeEditor notify={notify} />
+          ) : section === 'users' ? (
+            <UsersPanel notify={notify} />
+          ) : section === 'system' ? (
+            <Operations />
           ) : resources[section] ? (
             <ResourceManager key={section} resource={section} notify={notify} />
           ) : (
@@ -168,48 +190,21 @@ function Workspace({ user, logout }) {
   );
 }
 export default function AdminApp() {
-  const [user, setUser] = useState(null);
-  const [checking, setChecking] = useState(true);
-  const [error, setError] = useState('');
-  const [attempt, setAttempt] = useState(0);
-  useEffect(() => {
-    let active = true;
-    setChecking(true);
-    setError('');
-    apiClient
-      .me()
-      .then((data) => {
-        if (active) setUser(data.user);
-      })
-      .catch((failure) => {
-        if (active && failure.status !== 401 && failure.status !== 403) setError(failure.message);
-      })
-      .finally(() => {
-        if (active) setChecking(false);
-      });
-    const expired = () => setUser(null);
-    window.addEventListener('portfolio:session-expired', expired);
-    return () => {
-      active = false;
-      window.removeEventListener('portfolio:session-expired', expired);
-    };
-  }, [attempt]);
-  async function logout() {
-    try {
-      await apiClient.logout();
-    } catch (failure) {
-      if (failure.status !== 401) throw failure;
-    }
-    setUser(null);
-  }
+  const { user, setUser, checking, error, logout, retry } = useAuth();
   if (checking) return <StatePanel loading title="Checking your session" />;
   if (error)
+    return <StatePanel title="CMS temporarily unavailable" message={error} retry={retry} />;
+  if (user && user.role !== 'admin')
     return (
-      <StatePanel
-        title="CMS temporarily unavailable"
-        message={error}
-        retry={() => setAttempt(attempt + 1)}
-      />
+      <main className="cms-login">
+        <StatePanel
+          title="Administrator access required"
+          message="Your account can access the portfolio, but cannot edit its content."
+        />
+        <Link className="primary-action" to="/account">
+          Your account
+        </Link>
+      </main>
     );
   return user ? <Workspace user={user} logout={logout} /> : <Login onLogin={setUser} />;
 }

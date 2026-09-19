@@ -2,82 +2,107 @@ import { ArrowUpRight, Mail } from 'lucide-react';
 import { usePortfolio } from '../context/PortfolioContext.jsx';
 import { settingValue } from '../lib/content.js';
 import { ContentLink, StatePanel } from './Ui.jsx';
+import PageHeading from './PageHeading.jsx';
+import { Timeline } from '../pages/ProfilePage.jsx';
 import './AboutContact.css';
-export function AboutSection({ page = false }) {
-  const {
-    content: { profile },
-  } = usePortfolio();
-  const Heading = page ? 'h1' : 'h2';
+export function AboutSection() {
+  const { content } = usePortfolio(),
+    about = content.sections?.about || {};
+  if (about.visible === false) return <StatePanel title="About page unavailable" />;
   return (
-    <section
-      id="about"
-      className="section-pad section-border scroll-mt-24"
-      aria-labelledby="about-title"
-    >
-      <div className="shell about-layout">
-        <div>
-          <p className="eyebrow">About / approach</p>
-          <Heading id="about-title">Build the useful thing, then make it easier to trust.</Heading>
-        </div>
-        <div>
-          {profile?.bio ? (
-            <p className="about-bio whitespace-pre-line">{profile.bio}</p>
-          ) : (
-            <p>More about my engineering journey will be shared here.</p>
+    <article className="shell pb-12">
+      <PageHeading number="07" title={about.title || 'About'}>
+        {about.subtitle || 'Background, interests, and how I approach engineering.'}
+      </PageHeading>
+      <div className="about-composition">
+        <aside>
+          <p className="eyebrow">In my own words</p>
+          <h2>{about.heading || 'A little more context.'}</h2>
+          {content.profile?.focusAreas?.length > 0 && (
+            <ul>
+              {content.profile.focusAreas.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
           )}
-          <ul className="focus-list">
-            {profile?.focusAreas?.map((area) => (
-              <li key={area}>{area}</li>
-            ))}
-          </ul>
+        </aside>
+        <div className="about-story">
+          <div className="about-prose">
+            {about.body || content.profile?.bio || 'More background will be added here.'}
+          </div>
+          {about.principles?.length > 0 && (
+            <section>
+              <p className="eyebrow">How I work</p>
+              <ol>
+                {about.principles.map((item, index) => (
+                  <li key={item}>
+                    <span>{String(index + 1).padStart(2, '0')}</span>
+                    {item}
+                  </li>
+                ))}
+              </ol>
+            </section>
+          )}
+          {about.experience?.length > 0 && (
+            <section>
+              <p className="eyebrow">Experience</p>
+              <Timeline entries={about.experience} />
+            </section>
+          )}
         </div>
       </div>
-    </section>
+    </article>
   );
 }
-export function ContactSection({ page = false }) {
-  const { content } = usePortfolio();
-  const email = settingValue(content.settings, 'contactEmail');
-  const Heading = page ? 'h1' : 'h2';
+export function ContactSection() {
+  const { content } = usePortfolio(),
+    contact = content.sections?.contact || {},
+    email = contact.email || settingValue(content.settings, 'contactEmail');
+  if (contact.visible === false) return <StatePanel title="Contact page unavailable" />;
   return (
-    <section
-      id="contact"
-      className="contact-section section-pad scroll-mt-24"
-      aria-labelledby="contact-title"
-    >
-      <div className="shell contact-layout">
+    <article className="shell contact-page">
+      <PageHeading number="08" title={contact.title || 'Contact'}>
+        {contact.subtitle || 'For engineering opportunities and thoughtful conversations.'}
+      </PageHeading>
+      <div className="contact-composition">
         <div>
-          <p className="eyebrow">Let’s talk</p>
-          <Heading id="contact-title">Have a system worth talking about?</Heading>
-        </div>
-        <div>
-          <p>
-            For collaborations, engineering conversations, or work opportunities, a concise note is
-            the best place to start.
+          <p className="eyebrow">Get in touch</p>
+          <h2>{contact.heading || 'Let’s talk.'}</h2>
+          <p className="contact-description">
+            {contact.description ||
+              'A concise introduction and a little context are a good place to start.'}
           </p>
-          {email && (
-            <ContentLink to={'mailto:' + email} className="contact-email">
-              <Mail size={18} />
-              {email}
-              <ArrowUpRight size={17} />
+          {email && contact.showEmail !== false && (
+            <ContentLink to={'mailto:' + email} className="contact-primary">
+              <Mail size={20} />
+              <span>{email}</span>
+              <ArrowUpRight size={23} />
             </ContentLink>
           )}
-          <div className="mt-5 flex flex-wrap gap-3">
-            {content.socials.map((link) => (
-              <ContentLink key={link._id} to={link.url} className="secondary-action">
-                {link.label}
-                <ArrowUpRight size={16} />
-              </ContentLink>
-            ))}
-          </div>
-          {!email && !content.socials.length && (
-            <StatePanel
-              title="Contact details coming soon"
-              message="Public contact channels have not been configured yet."
-            />
+          {contact.ctaLabel && (
+            <ContentLink to={contact.ctaUrl} className="secondary-action mt-6">
+              {contact.ctaLabel}
+              <ArrowUpRight size={16} />
+            </ContentLink>
           )}
         </div>
+        <nav className="contact-links" aria-label="Contact channels">
+          {contact.showSocials !== false &&
+            content.socials.map((link, index) => (
+              <ContentLink to={link.url} key={link._id}>
+                <span className="font-mono text-xs text-muted">
+                  {String(index + 1).padStart(2, '0')}
+                </span>
+                <span>{link.label}</span>
+                <ArrowUpRight size={19} />
+              </ContentLink>
+            ))}
+          {!email && !content.socials.length && (
+            <p className="text-sm text-secondary">Contact details haven’t been published yet.</p>
+          )}
+          {contact.note && <p className="contact-note">{contact.note}</p>}
+        </nav>
       </div>
-    </section>
+    </article>
   );
 }

@@ -1,21 +1,16 @@
-# Ramzan Khan — Engineering Portfolio
+# Ramzan Khan — Engineering Portfolio V1
 
-A MERN portfolio with a responsive public website, a live-project showroom, and a protected content management workspace. React/Vite, Tailwind CSS, Express, MongoDB/Mongoose, and cookie-based administrator sessions.
+A MERN engineering portfolio with distinct page views, a live-project showroom, five themes, a granular CMS, resume publishing, and shared user/admin authentication.
 
-## V1, enhanced (1.1.0)
+## Experience
 
-- Dedicated Profile, Skills, Work, project detail, Showroom, About, and Contact routes.
-- CMS-managed profile/CTAs, skills, published projects, navigation, simple text pages, social links, site metadata, and showroom configuration.
-- Independent application embedding with directional project switching, Coming Soon entries, keyboard navigation, and useful failure/retry states.
-- Responsive admin forms and lists, project association dropdowns, field validation, dashboard counts, and password changes.
-- Server-side authorization, revocable sessions, origin checks, safe URLs, rate limits, and explicit public/private data boundaries.
-- API integration tests against an isolated MongoDB, component tests, and browser-to-database tests.
+Home (`/` or `/home`), Profile, Skills, Work, Showroom, Resume, About, and Contact are separate routes. The navbar and footer remain in the viewport while the current page scrolls between them. A fresh gesture at the true top/bottom boundary can navigate between enabled portfolio pages. Visitors can disable this behavior; reduced-motion preferences disable it automatically. Showroom interaction never triggers route scrolling.
 
-TypeWriter remains a separate application. This repository does **not** contain a replacement typing game. Configure its real embedding-compatible URL in the CMS. Until then the showroom clearly states that the experience is not connected. No invented projects or fallback portfolio are substituted when the API fails.
+Dark, Light, Midnight, Graphite, and Fieldwork themes share design tokens across public pages, account screens, and the CMS. Theme choice persists locally. The showroom embeds independent applications, not simulated replacements. TypeWriter needs its real embedding-compatible URL; missing integrations show an honest unavailable state.
 
-## Local setup
+## Setup
 
-Use Node.js 22 LTS, npm, and a running MongoDB instance. Clone your own repository and open this directory. Three package-lock files pin the root tooling and both applications.
+Use Node.js 22, npm, and MongoDB. Run from this directory:
 
 ```powershell
 npm.cmd ci
@@ -23,52 +18,50 @@ npm.cmd --prefix portfolio_backend ci
 npm.cmd --prefix portfolio_frontend ci
 ```
 
-1. Create `portfolio_backend/.env` from its example **only if it does not already exist**. Set the MongoDB connection, a random JWT secret, allowed browser origin, and initial admin credentials. Never copy examples over working secrets.
-2. Create `portfolio_frontend/.env` from its example if needed. Development defaults to the Vite `/api` proxy.
-3. Start your local MongoDB or configure an accessible managed database.
-4. Seed initial content and an admin, then run both applications:
+Create each application's `.env` from its example **only if it does not already exist**. Configure the backend database, JWT secret, browser origin, and initial administrator credentials. Do not overwrite working secrets.
 
 ```powershell
 npm.cmd --prefix portfolio_backend run seed
 npm.cmd run dev
 ```
 
-Public: http://localhost:5173 · Admin: http://localhost:5173/admin · Health: http://localhost:5000/health
+Public site: http://localhost:5173 · CMS: http://localhost:5173/admin · API health: http://localhost:5000/health
 
-Seed inserts absent records; it preserves existing records and passwords. It can recreate a deleted initial record if rerun. Edit existing TypeWriter URLs/navigation through the CMS; changing seed configuration does not overwrite them. No default login password is provided.
+Seeding preserves existing content and credentials, except that the exact unchanged legacy six-item navigation is upgraded to the eight-page layout. Customized navigation is not rewritten. Missing default records may be inserted/recreated. Back up MongoDB first; do not run seed as a recurring synchronization job.
 
-## Development and checks
+## Accounts and publishing
 
-| Command from this directory | Purpose                                                 |
-| --------------------------- | ------------------------------------------------------- |
-| `npm.cmd run dev`           | API and frontend together                               |
-| `npm.cmd run lint`          | ESLint for application and test code                    |
-| `npm.cmd run format:check`  | Prettier validation                                     |
-| `npm.cmd run format`        | Format source and documentation                         |
-| `npm.cmd test`              | Backend integration/schema and frontend component tests |
-| `npm.cmd run test:e2e`      | Isolated API + MongoDB + Chromium browser flows         |
-| `npm.cmd run build`         | Optimized frontend in `portfolio_frontend/dist`         |
+- Visitors may browse without an account. Signup and login use a shared HTTP-only cookie session; normal users cannot access admin APIs.
+- Google sign-in requires a Google Identity Services web client ID and authorized browser origins. A new Google identity must create a **portfolio password**, never enter its Google password. Existing local accounts must confirm their current portfolio password before linking.
+- Admin screens cover Hero, Identity, Profile details, About, Skills, Projects, Showroom, Resume, Contact, Socials, Navigation, Footer, Themes, Settings, Pages, Users, Account, and Operations.
+- Resume uploads accept validated PDFs up to 5 MB. Metadata, links, visibility, and download action are configurable. Education/experience/skills/projects are reused from their content modules.
+- Backend file logging separates application, HTTP, authentication, admin, and error events with rotation and whitelisted metadata.
 
-Browser tests need Playwright Chromium; MongoDB tests need a downloadable or installed MongoDB binary. See [testing](docs/TESTING.md) for setup, reproducible commands, artifacts, and acceptance limits.
+Google and real TypeWriter deployment acceptance require your actual configuration. No live deployment, real database migration, or real resume upload is performed by the automated tests.
 
-## First CMS session
+## Commands
 
-Update Profile & About, review seed skills/project copy, add your real social/contact links, and publish your projects. Under Showroom select TypeWriter, choose `iframe`/`live`, and enter Integration URL and Full project URL. Keep upcoming work `coming-soon`.
+| Command                                    | Purpose                                        |
+| ------------------------------------------ | ---------------------------------------------- |
+| `npm.cmd run dev`                          | API + Vite                                     |
+| `npm.cmd run lint`                         | ESLint                                         |
+| `npm.cmd test`                             | API/database and frontend component tests      |
+| `npm.cmd run test:e2e`                     | Isolated browser → API → MongoDB scenarios     |
+| `npm.cmd run build`                        | Production frontend in portfolio_frontend/dist |
+| `npm.cmd run format:check`                 | Formatting verification                        |
+| `npm.cmd --prefix portfolio_backend start` | Persistent production API                      |
 
-To add Experience: create and publish a text page with slug `experience`, then add a Navigation entry pointing to `/experience`. Ordering uses smaller numbers first; visibility is configurable by viewport. These are simple content pages, not a blog or V2 feature platform.
+Tests need an installed/downloadable MongoDB binary and Playwright Chromium. See [testing](docs/TESTING.md).
 
-## Deployment and status
+## Architecture and documentation
 
-Host the frontend build with SPA fallback and run the Express backend as a persistent Node process connected to MongoDB. Prefer a same-origin `/api` reverse proxy. Production requires HTTPS, deployment-specific origins/cookies, backups, and a real TypeWriter acceptance check. No hosting account or live deployment is provisioned by this repository.
+React 18 + React Router + Vite + Tailwind/component CSS → Express + Zod + Mongoose → MongoDB. Public content, cookie-authenticated accounts, and role-protected CMS APIs share one backend. Private resume files and rotated logs need durable server storage.
 
-The implementation is V1 only. Engineering articles/case studies (V2) and an AI assistant (V3) are documented, not implemented. See [V1 status and limitations](docs/versions/V1.md).
+- [Frontend setup](portfolio_frontend/README.md) · [Backend setup](portfolio_backend/README.md)
+- [Architecture](docs/ARCHITECTURE.md) · [API](docs/API.md) · [Database and upgrades](docs/DATABASE.md)
+- [Authentication/security](docs/SECURITY.md) · [CMS](docs/CMS.md) · [Showroom](docs/SHOWROOM.md)
+- [Themes](docs/THEMES.md) · [Styling](docs/STYLING.md) · [Responsive behavior](docs/RESPONSIVE.md)
+- [Environment](docs/ENVIRONMENT.md) · [Deployment](docs/DEPLOYMENT.md) · [Troubleshooting](docs/TROUBLESHOOTING.md)
+- [QA evidence](docs/QA_REPORT.md) · [V1 specification](docs/versions/V1.md) · [Version history](docs/versions/CHANGELOG.md)
 
-## Documentation
-
-- [Architecture](docs/ARCHITECTURE.md), [frontend](docs/FRONTEND.md), [backend](docs/BACKEND.md)
-- [API contracts](docs/API.md), [database](docs/DATABASE.md), [authentication/security](docs/SECURITY.md)
-- [Showroom integration](docs/SHOWROOM.md), [CMS guide](docs/CMS.md)
-- [Styling ownership](docs/STYLING.md), [responsive QA](docs/RESPONSIVE.md)
-- [Environment configuration](docs/ENVIRONMENT.md), [deployment](docs/DEPLOYMENT.md)
-- [Testing](docs/TESTING.md), [troubleshooting](docs/TROUBLESHOOTING.md)
-- [Version history](docs/versions/CHANGELOG.md), [V2/V3 roadmap](docs/versions/ROADMAP.md)
+Deploy the static frontend with SPA fallback and the backend as a persistent Node service. Prefer a same-origin /api reverse proxy. Production readiness still requires real HTTPS cookie/Google/iframe checks, backups and restoration, and appropriate monitoring. V2 articles and V3 AI remain future work.

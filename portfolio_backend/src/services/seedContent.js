@@ -55,11 +55,43 @@ export async function seedContent({ typewriterUrl = '' } = {}) {
       liveUrl: typewriterUrl,
     },
   );
-  for (const [order, [label, destination]] of [
+  // Upgrade only the exact legacy default navigation; customized rows are not rewritten.
+  const legacy = [
     ['Profile', '/'],
     ['Skills', '/skills'],
     ['Work', '/work'],
     ['Showroom', '/showroom'],
+    ['About', '/about'],
+    ['Contact', '/contact'],
+  ];
+  const existingNav = await NavigationItem.find().sort({ order: 1 }).lean();
+  if (
+    existingNav.length === legacy.length &&
+    existingNav.every(
+      (row, index) =>
+        row.label === legacy[index][0] &&
+        row.destination === legacy[index][1] &&
+        row.order === index &&
+        row.enabled,
+    )
+  ) {
+    await NavigationItem.updateOne(
+      { _id: existingNav[0]._id },
+      { destination: '/profile', order: 1 },
+    );
+    for (let index = 1; index < existingNav.length; index++)
+      await NavigationItem.updateOne(
+        { _id: existingNav[index]._id },
+        { order: index + (index >= 4 ? 2 : 1) },
+      );
+  }
+  for (const [order, [label, destination]] of [
+    ['Home', '/'],
+    ['Profile', '/profile'],
+    ['Skills', '/skills'],
+    ['Work', '/work'],
+    ['Showroom', '/showroom'],
+    ['Resume', '/resume'],
     ['About', '/about'],
     ['Contact', '/contact'],
   ].entries()) {

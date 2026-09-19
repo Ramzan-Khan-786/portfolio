@@ -6,6 +6,10 @@ import NavigationItem from '../models/NavigationItem.js';
 import SocialLink from '../models/SocialLink.js';
 import Setting from '../models/Setting.js';
 import Page from '../models/Page.js';
+import User from '../models/User.js';
+import Resume from '../models/Resume.js';
+import ContentSection from '../models/ContentSection.js';
+import { publicSections } from './sectionController.js';
 import { ApiError, asyncHandler } from '../utils/ApiError.js';
 import { slugify } from '../utils/slugify.js';
 import { checkProject, setDefault, showroomRecords } from '../services/showroom.js';
@@ -112,7 +116,29 @@ export const dashboard = asyncHandler(async (_req, res) => {
     NavigationItem.countDocuments({ enabled: true }),
     Project.find().sort({ updatedAt: -1 }).limit(5).select('title published updatedAt').lean(),
   ]);
-  res.json({ ok: true, data: { projects, liveProjects, skills, showroom, navigation, recent } });
+  const [users, resume, lastSection] = await Promise.all([
+    User.countDocuments({ role: 'user' }),
+    Resume.findOne().select('+filename').lean(),
+    ContentSection.findOne().sort({ updatedAt: -1 }).lean(),
+  ]);
+  res.json({
+    ok: true,
+    data: {
+      projects,
+      liveProjects,
+      skills,
+      showroom,
+      navigation,
+      recent,
+      users,
+      resume: {
+        visible: resume?.visible ?? true,
+        hasFile: Boolean(resume?.filename),
+        externalUrl: Boolean(resume?.externalUrl),
+      },
+      lastContentUpdate: lastSection?.updatedAt || null,
+    },
+  });
 });
 export const bootstrap = asyncHandler(async (_req, res) => {
   const [profile, skills, projects, showroom, navigation, socials, settings] = await Promise.all([
@@ -131,7 +157,16 @@ export const bootstrap = asyncHandler(async (_req, res) => {
   ]);
   res.json({
     ok: true,
-    data: { profile, skills, projects, showroom, navigation, socials, settings },
+    data: {
+      profile,
+      skills,
+      projects,
+      showroom,
+      navigation,
+      socials,
+      settings,
+      sections: await publicSections(),
+    },
   });
 });
 export const projectDetail = asyncHandler(async (req, res) => {

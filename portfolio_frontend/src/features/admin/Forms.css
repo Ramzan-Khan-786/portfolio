@@ -4,7 +4,7 @@
 .cms-field label {
   display: block;
   margin-bottom: 0.45rem;
-  color: #435347;
+  color: var(--secondary);
   font-size: 0.82rem;
   font-weight: 600;
 }
@@ -13,11 +13,11 @@
 .cms-field select {
   width: 100%;
   min-height: 44px;
-  border: 1px solid #bac8bd;
+  border: 1px solid var(--border);
   border-radius: 0.35rem;
   padding: 0.65rem 0.75rem;
-  color: #172219;
-  background: #fbfcfa;
+  color: var(--text);
+  background: var(--bg);
   font-size: 0.9rem;
 }
 .cms-field textarea {
@@ -26,19 +26,19 @@
 .cms-field input[aria-invalid='true'],
 .cms-field textarea[aria-invalid='true'],
 .cms-field select[aria-invalid='true'] {
-  border-color: #b3412c;
+  border-color: var(--danger);
 }
 .cms-field small {
   display: block;
   margin-top: 0.4rem;
-  color: #637368;
+  color: var(--muted);
   line-height: 1.5;
   font-size: 0.73rem;
 }
 .cms-field .cms-field-error,
 .cms-field-error {
   display: block;
-  color: #a53b26;
+  color: var(--danger);
   font-size: 0.75rem;
   margin-top: 0.3rem;
 }
@@ -48,26 +48,43 @@
   align-items: center;
   gap: 0.65rem;
   font-size: 0.86rem;
-  color: #435347;
+  color: var(--secondary);
 }
 .cms-checkbox input {
   width: 18px;
   height: 18px;
-  accent-color: #294a3b;
+  accent-color: var(--accent);
 }
 .cms-error {
   padding: 0.85rem 1rem;
   margin-block: 1rem;
-  background: #fff2ed;
-  border: 1px solid #e7bdac;
-  color: #903c27;
+  background: var(--danger-bg);
+  border: 1px solid var(--danger);
+  color: var(--danger);
   border-radius: 0.35rem;
   font-size: 0.85rem;
 }
 .cms-editor {
-  background: white;
+  background: var(--surface);
   padding: clamp(1rem, 3vw, 1.75rem);
-  border: 1px solid #d9e0d8;
+  border: 1px solid var(--border);
   border-radius: 0.5rem;
   margin-bottom: 1.5rem;
+}
+.cms-repeater {
+  min-width: 0;
+  border-top: 1px solid var(--border);
+  padding-top: 1rem;
+}
+.cms-repeater legend {
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding-right: 0.75rem;
+}
+.cms-repeater-row {
+  border: 1px solid var(--border);
+  background: var(--bg);
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: var(--radius);
 }

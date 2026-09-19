@@ -1,35 +1,39 @@
-# Frontend
+# Frontend architecture
 
-## Routing
+## Routes and layout
 
-| URL                 | Screen                                                                     |
-| ------------------- | -------------------------------------------------------------------------- |
-| / and /profile      | Profile landing, selected work, showroom invitation, skills, about/contact |
-| /skills             | Grouped skills                                                             |
-| /work               | Published, nonarchived catalogue                                           |
-| /work/:slug         | Full project details, optional screenshots and links                       |
-| /showroom           | Project selector and independent embedded experience                       |
-| /about and /contact | Dedicated sections                                                         |
-| /:slug              | Published CMS text page; unavailable slug gets a 404 view                  |
-| /admin/*            | Protected workspace and section routes                                     |
-| other paths         | Not-found page                                                             |
+| Route           | Composition                                                            |
+| --------------- | ---------------------------------------------------------------------- |
+| /, /home        | Identity, concise introduction, selected work, actual technical counts |
+| /profile        | Developer dossier, focus, structured education/highlights/interests    |
+| /skills         | Grouped technical ledger                                               |
+| /work           | Filterable published project catalogue                                 |
+| /work/:slug     | Full project details, images, links                                    |
+| /showroom       | Compact selector, viewport-filling independent app, context/actions    |
+| /resume         | Professional document access/preview and shared structured background  |
+| /about          | Longer narrative, principles, experience                               |
+| /contact        | Minimal contact focus and configurable channels                        |
+| /login, /signup | Shared-themed email/Google account flows                               |
+| /account        | Protected account identity, providers, password change, logout         |
+| /admin/*        | Role-protected management workspace                                    |
+| /:slug          | Published CMS plain-text page or not-found view                        |
 
-SiteHeader and SiteFooter are shared by public routes. Metadata updates document title, description, Open Graph title/description, and optional canonical from the siteUrl setting. Metadata is client-rendered; social crawlers that do not run JavaScript only see index.html defaults.
+PublicLayout retains the header/footer, with .page-scroll as the only main scrolling region. Its height is the viewport minus the actual header/footer rows. Route changes use 340 ms fade/translation. History restores per-location scroll; backward boundary navigation lands at the preceding page's end.
 
-## Data and state
+useBoundaryNavigation never advances while page content can still scroll. A quiet gap of 220 ms, a fresh gesture at the boundary, movement threshold, and 850–950 ms navigation locks limit trackpad momentum/repeated transitions. It ignores form/editable controls, modifier zoom, horizontal gestures and nested scrolling. Touch requires a deliberate vertical swipe starting at the boundary. Footer opt-out persists. Reduced motion disables automatic routing; Showroom opts out entirely.
 
-PortfolioProvider fetches /public/bootstrap once at initialization. Request sequence tracking prevents an old request from replacing newer content. It exposes content, status, sourceError, and refresh. Failure shows a retry screen instead of invented data.
+## State and data
 
-lib/api.js is the single fetch boundary: credentials, custom request header, 12-second timeout, response envelope parsing, and friendly errors. An unauthorized admin-resource request emits session-expired and the shell returns to login. No JWT is stored in browser JavaScript or localStorage.
+PortfolioProvider handles bootstrap/loading/errors/refresh and stale-request protection. AuthProvider handles me/login/logout/shared user state without browser-stored JWTs. ThemeProvider reads allowed themes/defaults from CMS and persists visitor choice. See [themes](THEMES.md).
 
-CMS state is local to each form; resource descriptors specify labels, types, defaults, and columns. toForm converts populated project objects to IDs; toPayload parses arrays/number fields. Save errors retain edits and show server field errors. Mutations refresh lists and public data. There is no Redux dependency or unrelated state framework.
+lib/api.js owns credentialed fetch, custom mutation header, 12-second timeout, success/error envelope parsing, field errors, and multipart upload support. All mutation success UI follows server acceptance. Unauthorized admin requests clear shared session state.
 
-## Interaction and accessibility
+CMS field descriptors include structured repeaters for actions, timeline entries, and links. Reorder/remove controls edit real array payloads. FormFields generates unique labels/IDs even in nested repeaters.
 
-Semantic headings, form labels, error descriptions, explicit button names, visible focus, skip navigation, and keyboard-controlled showroom tabs are provided. The mobile CMS drawer traps focus while open and supports Escape. Public mobile navigation closes on route selection/Escape. Reduced motion removes decorative movement.
+## Interaction and performance
 
-ContentLink accepts safe local, HTTP(S), or email destinations; new-tab links use noopener/noreferrer. ContentImage handles broken URLs without broken-image chrome. Long text wraps. Images are URL-based, not uploaded through the portfolio.
+Showroom, admin, resume, auth and account routes split into lazy chunks. Public bootstrap omits full project descriptions/screenshots. PDF preview mounts only when requested; only the active and briefly outgoing showroom app are mounted. Switching projects can reset embedded-app state.
 
-Showroom and AdminApp are lazy chunks. Bootstrap excludes full project descriptions/screenshots; detail routes fetch them separately. Only the active iframe and, during a 480ms transition, the outgoing iframe are rendered. Switching away ends that embedded session; returning loads it again.
+Semantic landmarks, visible focus, labeled controls, skip link, mobile menu Escape behavior, CMS drawer focus trap, tab keyboard navigation, and reduced-motion overrides are included. Blank API states show loading/empty/error/retry UI; they never invent portfolio records. External images remain URL-based.
 
-See [styling](STYLING.md), [responsive behavior](RESPONSIVE.md), and [showroom](SHOWROOM.md).
+Metadata is client-rendered; non-JavaScript social crawlers see index.html defaults. Test browser-specific PDF rendering and real embedded apps separately.

@@ -17,7 +17,7 @@ Until a real URL is supplied, the site shows an integration-in-preparation messa
 
 ## Embedding contract
 
-The iframe has an accessible title, full-width layout, bounded viewport-relative height, strict-origin-when-cross-origin referrer policy, and a sandbox allowing scripts, forms, popups, and the embedded origin. It cannot navigate the top window. Host the application on a separate origin and do not redirect it back into the portfolio.
+The iframe has an accessible title, full-width layout, height filling the available central viewport, strict-origin-when-cross-origin referrer policy, and a sandbox allowing scripts, forms, popups, and the embedded origin. It cannot navigate the top window. Host the application on a separate origin and do not redirect it back into the portfolio.
 
 For an explicit readiness indicator, the embedded app can send the following only after its usable UI initializes, with the real portfolio origin:
 
@@ -27,15 +27,17 @@ window.parent.postMessage({ type: 'portfolio:ready' }, 'https://your-portfolio.e
 
 The parent checks both message source and origin. Without this optional message, the app remains fully interactive but the toolbar says Independent application rather than Connected.
 
-Browser security prevents reliable introspection of cross-origin frames. In particular, iframe load may fire even when content is blocked, and error is not a reliable failure detector. The UI therefore provides loading/timeout feedback, Reload, Having trouble?, and Open full project, but does not falsely certify remote availability. See [MDN iframe behavior](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/iframe#error_and_load_event_behavior).
+Browser security prevents reliable introspection of cross-origin frames. In particular, iframe load may fire even when content is blocked, and error is not a reliable failure detector. The UI therefore provides loading/timeout feedback, Reload, Having trouble?, and Open live project, but does not falsely certify remote availability. See [MDN iframe behavior](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/iframe#error_and_load_event_behavior).
 
 A frame's own responsive UI is the independent application's responsibility. Portfolio CSS cannot repair a fixed-width page inside a cross-origin iframe. Test the real app at the target widths.
+
+The entire Showroom route disables boundary-scroll navigation. Navbar/footer remain persistent; the selector and compact caption surround a large interactive viewport. CMS fields include GitHub/technology overrides and fallback text; missing overrides reuse the associated public project.
 
 ## Selection, motion, and lifecycle
 
 Enabled records are sorted by order/ID. The effective default comes from the backend. Arrow keys/Home/End support tab selection and focus; mobile tabs scroll horizontally, and Previous/Next controls are available.
 
-Moving right slides the current experience left and the next one in from the right; moving left reverses that direction. The outgoing panel is inert/hidden from accessibility APIs and removed after 480ms. Rapid switches cancel previous cleanup timers; reduced-motion preferences bypass the outgoing animation. Only the selected and briefly outgoing iframe are mounted, not every project.
+Moving right slides the current experience left and the next one in from the right; moving left reverses that direction. The outgoing panel is inert/hidden from accessibility APIs and removed after 340ms. Rapid switches cancel previous cleanup timers; reduced-motion preferences bypass the outgoing animation. Only the selected and briefly outgoing iframe are mounted, not every project.
 
 Switching away can reset the independent app's in-memory state. Persistent typing progress, if required, belongs inside TypeWriter. No portfolio-level authentication or app-state bridge is assumed.
 

@@ -68,7 +68,7 @@ describe('showroom visitor experience', () => {
     );
     fireEvent.click(screen.getByRole('button', { name: 'Having trouble?' }));
     expect(screen.getByText(/blank or blocked window/)).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /Open full project/ })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: /Open live project/ })).toHaveAttribute(
       'href',
       items[0].externalUrl,
     );

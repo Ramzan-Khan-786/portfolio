@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { getResume, serveResume } from '../controllers/resumeController.js';
 import {
   bootstrap,
   getProfile,
@@ -8,6 +9,8 @@ import {
 } from '../controllers/contentController.js';
 
 const router = Router();
+router.get('/resume', getResume);
+router.get('/resume/file', serveResume);
 router.get('/bootstrap', bootstrap);
 router.get('/projects/:slug', projectDetail);
 router.get('/pages/:slug', pageDetail);

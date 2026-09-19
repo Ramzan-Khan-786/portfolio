@@ -1,5 +1,9 @@
 // Test-only server: always uses an ephemeral database, never a configured MongoDB URI.
 process.env.NODE_ENV = 'test';
+process.env.GOOGLE_CLIENT_ID = '';
+process.env.UPLOAD_DIR = (await import('node:url')).fileURLToPath(
+  new URL('../../../artifacts/qa/uploads/', import.meta.url),
+);
 process.env.CLIENT_ORIGIN = 'http://127.0.0.1:5179';
 process.env.JWT_SECRET = 'isolated-browser-test-secret-not-for-production';
 process.env.COOKIE_SECURE = 'false';
@@ -18,6 +22,7 @@ await mongoose.connect(mongo.getUri());
 await User.create({
   email: 'qa@example.test',
   name: 'QA administrator',
+  role: 'admin',
   passwordHash: await bcrypt.hash('qa-fixture-password-123', 4),
 });
 await seedContent({ typewriterUrl: 'http://127.0.0.1:5191' });

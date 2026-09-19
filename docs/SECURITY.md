@@ -1,34 +1,44 @@
 # Authentication and security
 
-## Administrator lifecycle
+## One session system, two roles
 
-There is no public registration endpoint. The seed creates an absent admin with an explicit email and a non-placeholder password of at least 12 characters and at most 72 UTF-8 bytes; it never resets existing credentials. The byte limit also applies to password changes, preventing bcrypt truncation of multibyte characters. Passwords use bcrypt cost 12 in application flows. Test-only users use a lower cost for speed.
+Direct signup validates name/email/password and explicitly creates role=user. Administrator accounts are created only through the private seed procedure; existing admins keep their stored role/password. Seeding refuses to promote a normal account whose email matches the requested administrator.
 
-Login compares a dummy hash for unknown emails and returns a generic invalid-credentials message. A successful login sets an HTTP-only portfolio_admin cookie restricted to /api. JWTs are signed with HS256, an explicit issuer/audience, subject, expiry, and session version. Each protected request looks up the current database role and session version.
+Passwords use bcrypt cost 12. New passwords require 12 characters and at most 72 UTF-8 bytes. Login accepts existing compatible passwords, uses a dummy comparison for unknown accounts, and returns a generic credential error. Suspension invalidates sessions and blocks authentication.
 
-Logout increments sessionVersion, invalidating copied cookies and other sessions for that user. Account password change verifies the current password, updates the hash/version, and issues a fresh cookie for the current session. Restarting with a changed JWT secret invalidates every session. No reset-email workflow is included; do not expect seeding to recover an existing password.
+The legacy-named portfolio_admin cookie now serves both roles for compatibility. It is HTTP-only, scoped to /api, secure in production, and SameSite-configurable. HS256 JWTs contain subject, session version, expiry, issuer portfolio-api, and the retained audience portfolio-admin. Every protected request checks the database account/status/version; role claims supplied by clients are never trusted.
 
-## Request protections
+Logout increments sessionVersion and clears the cookie, revoking all sessions. Password changes verify the current password, update the hash/version, and issue a replacement cookie for the current session. No JWT is stored in localStorage. No password-reset or email-confirmation delivery service is implemented.
 
-- Every mutation requires X-Portfolio-Request: cms; browser cross-origin use therefore requires successful CORS preflight.
-- Present Origin headers must match the configured allowlist. Cross-site fetches without an Origin are rejected.
-- Production cookies are Secure; SameSite defaults to lax. Cross-site deployment requires none plus HTTPS and may still be blocked by third-party-cookie settings.
-- Login is limited to 15 requests per 15 minutes/IP; password changes to 10; admin namespace to 500.
-- Auth/admin responses are no-store. Helmet applies API response headers.
-- URL validation rejects script/data schemes and credential-bearing URLs. Plain text is rendered without raw HTML.
-- Bad IDs, malformed JSON, duplicate keys, excessive payloads, and validation errors have safe status responses.
-- Public bootstrap exposes only an allowlist of setting keys and public project data.
+## Google flow
 
-Custom headers/origin checks are browser CSRF defenses, not a replacement for authentication. Curl/nonbrowser clients can set headers but still need a valid admin session. Never use wildcard CORS for credentials. TRUST_PROXY must match trusted network topology so client-IP limits remain meaningful.
+1. POST /auth/google/challenge creates a short-lived random nonce, stores its hash/expiry in MongoDB, and sets an HTTP-only challenge cookie.
+2. The official GIS button includes the nonce in its ID-token request. The browser posts the credential over the protected JSON API.
+3. The official Google server library verifies signature, audience, issuer and expiry. The service additionally requires email_verified and an exact nonce match, then atomically consumes the challenge.
+4. A known googleId signs in using its stable subject. An unlinked existing email requires the current portfolio password. A new identity must create a new **portfolio account password**, never provide a Google password.
+5. Completion uses an opaque HTTP-only pending cookie backed by a hashed, expiring, single-use MongoDB record. Verified profile data is server-owned; email/role/provider claims are not accepted from the completion request.
+6. Completion consumes the proof, checks existing account version/status when linking, hashes a new password when creating, and issues the normal session cookie. Unique email and sparse unique googleId indexes prevent duplicate accounts.
 
-## Iframe trust
+Invalid, expired, unverified, mismatched, or replayed challenges fail. Google tokens are not persisted or logged. This is a JavaScript callback flow protected by custom-header preflight, exact Origin checks, and server nonce binding; it is not a redirect endpoint accepting unverified Google POST bodies.
 
-Showroom uses a sandbox with scripts, forms, popups, and same-origin capability for the independent app, but no top-level navigation. Only configure apps you trust. Direct same-origin embedding is rejected to avoid portfolio recursion and the dangerous same-origin/script combination. Keep embedded apps on a separate origin; ensure configured URLs do not redirect back onto the portfolio origin.
+Set GOOGLE_CLIENT_ID to a Google Identity Services web client ID and configure authorized JavaScript origins. No client secret is required for this ID-token flow. Test the real Google consent/popup/FedCM behavior on the deployed origins. Automated tests mock the external verifier boundary, not real Google sign-in.
 
-A portfolio:ready message is accepted only from the current iframe window and configured origin. It is a UI readiness signal, not authentication. An iframe load event cannot prove that a remote application loaded successfully; visitors retain troubleshooting/reload/open-full controls.
+References: [Google server verification](https://developers.google.com/identity/gsi/web/guides/verify-google-id-token), [GIS JavaScript reference](https://developers.google.com/identity/gsi/web/reference/js-reference).
 
-## Deployment checks and limits
+## Request and content defenses
 
-Serve both applications over HTTPS, protect database credentials in the server secret store, limit database network access, configure frontend response security headers, and keep backups. V1 has no MFA, distributed session store, immutable audit log, upload pipeline, or independent penetration test. Rate limits reset on process restart and are not shared between API instances.
+- Explicit credentialed CORS origins; every mutation requires X-Portfolio-Request: cms. Untrusted Origin and cross-site requests without Origin are rejected.
+- Login/admin login/signup: 15 requests per 15 minutes/IP; password: 10; Google namespace: 40, completion additionally 15; admin namespace: 500.
+- Auth/admin responses are no-store. URLs reject unsafe schemes, credentials and protocol-relative destinations. Page slugs cannot override system routes.
+- Public APIs filter drafts/private settings. Showroom references never expose unpublished project details.
+- Central errors use predictable status/envelopes without production stack traces. Logs whitelist only safe event metadata.
 
-Production dependency audit currently reports no known vulnerabilities; this is a point-in-time advisory check, not proof of security. Repeat npm audit after dependency updates. Follow the [Express production security guidance](https://expressjs.com/en/advanced/best-practice-security.html).
+## Resume safety
+
+Administrator-only multipart upload requires PDF extension/MIME/header and successful parsing, 1–50 pages, and at most 5 MB. Recursive object inspection rejects scripts, actions, forms and embedded attachments. UUID filenames are generated server-side; no client-controlled storage paths are accepted. Public access serves only the current published file with PDF MIME, no-store, nosniff, controlled disposition and restricted frame policy.
+
+Validation is not antivirus. Only upload trusted documents; add malware scanning if accepting uploads from less-trusted roles in the future. A viewable PDF can always be saved by the visitor: disabling the download action is not DRM. Removing/replacing a PDF keeps old bytes private for operator recovery.
+
+## Deployment responsibilities
+
+Use HTTPS, explicit proxy trust, restricted MongoDB access, durable storage/backups, current dependencies and monitoring. Process-local limits/log windows are not a distributed security system. MFA, account recovery/email verification, abuse moderation, hardware/browser acceptance and live Google/TypeWriter verification remain outside automated local acceptance.

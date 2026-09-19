@@ -1,41 +1,41 @@
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
-import { env } from '../config/env.js';
+import { cookieOptions, issueSession, safeUser } from '../services/session.js';
+import { audit } from '../services/logger.js';
 import { ApiError, asyncHandler } from '../utils/ApiError.js';
-const cookieOptions = {
-  httpOnly: true,
-  secure: env.cookieSecure,
-  sameSite: env.cookieSameSite,
-  path: '/api',
-};
-const safeUser = (user) => ({ id: user.id, name: user.name, email: user.email, role: user.role });
 const dummyHash = bcrypt.hashSync('unused-comparison-password', 12);
-function issueSession(res, user) {
-  const token = jwt.sign({ sub: user.id, version: user.sessionVersion || 0 }, env.jwtSecret, {
-    algorithm: 'HS256',
-    expiresIn: env.jwtExpiresIn,
-    issuer: 'portfolio-api',
-    audience: 'portfolio-admin',
+export const signup = asyncHandler(async (req, res) => {
+  const { name, email, password } = req.validatedBody;
+  if (await User.exists({ email: email.toLowerCase() }))
+    throw new ApiError(409, 'An account with this email already exists. Sign in instead.');
+  const user = await User.create({
+    name,
+    email: email.toLowerCase(),
+    role: 'user',
+    passwordHash: await bcrypt.hash(password, 12),
   });
-  const payload = jwt.decode(token);
-  res.cookie('portfolio_admin', token, {
-    ...cookieOptions,
-    maxAge: (payload.exp - payload.iat) * 1000,
-  });
-}
+  issueSession(res, user);
+  audit('auth', 'auth.signup', { userId: user.id });
+  res.status(201).json({ ok: true, data: { user: safeUser(user) } });
+});
 export const login = asyncHandler(async (req, res) => {
   const { email, password } = req.validatedBody;
   const user = await User.findOne({ email: email.toLowerCase() }).select('+passwordHash');
   const valid = await bcrypt.compare(password, user?.passwordHash || dummyHash);
-  if (!user || !valid) throw new ApiError(401, 'Invalid email or password.');
-  if (user.role !== 'admin') throw new ApiError(403, 'Administrator access is required.');
+  if (!user || !valid || user.disabled) {
+    audit('auth', 'auth.login_failed', { requestId: req.requestId });
+    throw new ApiError(401, 'Invalid email or password.');
+  }
+  if (req.path === '/admin/login' && user.role !== 'admin')
+    throw new ApiError(403, 'Administrator access is required.');
   issueSession(res, user);
+  audit('auth', 'auth.login', { userId: user.id });
   res.json({ ok: true, data: { user: safeUser(user) } });
 });
 export const logout = asyncHandler(async (req, res) => {
   await User.updateOne({ _id: req.user.id }, { $inc: { sessionVersion: 1 } });
   res.clearCookie('portfolio_admin', cookieOptions);
+  audit('auth', 'auth.logout', { userId: req.user.id });
   res.json({ ok: true, data: null });
 });
 export const me = (req, res) => res.json({ ok: true, data: { user: safeUser(req.user) } });
@@ -47,5 +47,6 @@ export const changePassword = asyncHandler(async (req, res) => {
   user.sessionVersion += 1;
   await user.save();
   issueSession(res, user);
+  audit('auth', 'auth.password_changed', { userId: user.id });
   res.json({ ok: true, data: null });
 });

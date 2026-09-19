@@ -13,7 +13,7 @@ const webUrl = z
       return false;
     }
   }, 'Use an HTTP or HTTPS URL without credentials.');
-const optionalUrl = webUrl.or(z.literal('')).optional().default('');
+export const optionalUrl = webUrl.or(z.literal('')).optional().default('');
 const order = z.coerce.number().int().min(0).max(100000).default(0);
 const slug = text(1, 160).regex(
   /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
@@ -21,7 +21,7 @@ const slug = text(1, 160).regex(
 );
 const internal = (value) =>
   /^\/(?!\/)[a-zA-Z0-9/#?=&._~-]*$/.test(value) || /^#[a-zA-Z][\w-]*$/.test(value);
-const destination = z
+export const destination = z
   .string()
   .trim()
   .max(2048)
@@ -33,6 +33,17 @@ export const loginSchema = z.object({
   email: text(3, 254).email(),
   password: z.string().min(8).max(128),
 });
+export const newPassword = z
+  .string()
+  .min(12)
+  .max(72)
+  .refine((value) => Buffer.byteLength(value, 'utf8') <= 72, 'Use at most 72 UTF-8 bytes.');
+export const signupSchema = z
+  .object({ name: text(2, 80), email: text(3, 254).email(), password: newPassword })
+  .strict();
+export const googleSchema = z.object({ credential: z.string().min(20).max(10000) }).strict();
+export const googlePasswordSchema = z.object({ password: z.string().min(8).max(128) }).strict();
+export const userStatusSchema = z.object({ disabled: z.boolean() }).strict();
 export const passwordSchema = z.object({
   currentPassword: z.string().min(8).max(128),
   newPassword: z
@@ -61,6 +72,7 @@ export const profileSchema = z.object({
   secondaryCtaUrl: destination.default('/showroom'),
 });
 export const skillSchema = z.object({
+  iconUrl: optionalUrl,
   name: text(1, 80),
   category: text(1, 80),
   description: text(0, 280).default(''),
@@ -129,6 +141,9 @@ export const showroomSchema = z
       .transform((value) => (value === 'sandbox' ? 'iframe' : value))
       .default('coming-soon'),
     embedUrl: optionalUrl,
+    githubUrl: optionalUrl,
+    technologies: z.array(text(1, 48)).max(20).default([]),
+    fallbackMessage: text(0, 500).default(''),
     externalUrl: optionalUrl,
     status: z.enum(['live', 'coming-soon']).default('coming-soon'),
     order,
@@ -178,9 +193,21 @@ export const pageSchema = z.object({
   title: text(1, 120),
   slug: slug.refine(
     (value) =>
-      !['admin', 'profile', 'skills', 'work', 'showroom', 'about', 'contact', 'api'].includes(
-        value,
-      ),
+      ![
+        'admin',
+        'home',
+        'profile',
+        'skills',
+        'work',
+        'showroom',
+        'resume',
+        'about',
+        'contact',
+        'api',
+        'login',
+        'signup',
+        'account',
+      ].includes(value),
     'This route is reserved.',
   ),
   description: text(0, 300).default(''),

@@ -10,7 +10,8 @@ No deployment has been made by this implementation. The following is the host-in
 4. Set frontend build variables before building. Publish portfolio_frontend/dist as static files.
 5. Run the persistent API using `npm --prefix portfolio_backend start`; it connects before listening.
 6. Run `npm --prefix portfolio_backend run seed` once with explicit seed credentials if an admin/content does not yet exist. Remove seed passwords from long-lived deployment configuration afterward.
-7. Configure HTTPS, routing, origins/cookies, health checks, and the actual TypeWriter URL.
+7. Configure HTTPS, routing, origins/cookies, health checks, the Google web client and the actual TypeWriter URL.
+8. Mount private durable storage for UPLOAD_DIR and LOG_DIR. Back up PDFs with MongoDB metadata and monitor disk use; old PDF versions are retained for recovery. Do not expose either directory through generic static middleware.
 
 ## Routing and origins
 
@@ -46,4 +47,12 @@ Do not blanket-disable CSP or remove all iframe protections merely to make a dem
 - The actual independent TypeWriter route embeds, accepts typing, resizes, and opens externally.
 - Dependency audit and backups are current; restore procedure is tested.
 
-V1 limits: process-local rate limiting, no MFA/audit log, client-rendered SEO/404s, no file upload service, and no automatic multi-instance content/session cache. Address these according to the deployment's risk and scale, not by claiming they are already implemented.
+V1 limits: process-local rate limiting/event windows, no MFA/account-recovery email/direct-signup email confirmation, client-rendered SEO/404s, local PDF storage, no antivirus service, and no automatic multi-instance cache or shared file replication. File audit logs are not tamper-proof central auditing. Address these according to deployment risk.
+
+## Google and document acceptance
+
+Create/configure a Google Identity Services web client, set GOOGLE_CLIENT_ID in the backend, and allow exact browser origins (including ports for local testing). No client secret is needed. Test new-user password creation, returning Google login, existing-local password-confirmed linking, cancel/error/retry and logout.
+
+At the static host, permit the official Google script https://accounts.google.com/gsi/client and required Google frame/connect endpoints in a tested CSP. Include the public API/PDF origin in appropriate connect-src/frame-src rules alongside the actual embedded-app origin. Use Cross-Origin-Opener-Policy: same-origin-allow-popups where required by Google's popup flow. Preserve the inline theme initializer through a CSP hash/nonce rather than broadly allowing arbitrary scripts.
+
+Test uploaded PDF persistence after restart, public visibility/download restrictions, fallback links, and the browser's own PDF preview on your real origin topology. Viewing allows saving a document even when a download button is hidden. Old file cleanup needs an explicit retention/recovery procedure.

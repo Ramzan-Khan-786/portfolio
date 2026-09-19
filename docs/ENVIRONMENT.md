@@ -17,6 +17,9 @@ Existing .env files are ignored by Git and must not be overwritten during upgrad
 | TRUST_PROXY         | 0; exact trusted proxy-hop count if deployment sits behind proxies                                        |
 | SEED_ADMIN_EMAIL    | required by seed, normalized to lowercase                                                                 |
 | SEED_ADMIN_PASSWORD | required to create a new admin, at least 12 characters and at most 72 UTF-8 bytes, no example placeholder |
+| GOOGLE_CLIENT_ID    | Optional Google Identity Services web client ID; absence disables Google sign-in honestly                 |
+| UPLOAD_DIR          | Optional absolute private PDF directory; defaults to backend/uploads/resumes; requires durable storage    |
+| LOG_DIR             | Optional absolute private log directory; defaults to backend/logs                                         |
 | TYPEWRITER_URL      | optional seed-only HTTP(S) URL; never overwrites existing showroom/project records                        |
 
 Generate a random secret locally, then place the output directly in the backend .env or hosting secret store:

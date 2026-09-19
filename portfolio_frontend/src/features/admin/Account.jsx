@@ -64,7 +64,7 @@ export default function Account({ notify }) {
             {error}
           </p>
         )}
-        <button className="admin-primary mt-6" disabled={busy}>
+        <button className="primary-action mt-6" disabled={busy}>
           {busy ? 'Updating…' : 'Change password'}
         </button>
       </form>

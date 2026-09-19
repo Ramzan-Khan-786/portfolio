@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 import User from '../models/User.js';
 import { env } from '../config/env.js';
 import { ApiError, asyncHandler } from '../utils/ApiError.js';
-export const requireAdmin = asyncHandler(async (req, _res, next) => {
+export const requireAuth = asyncHandler(async (req, _res, next) => {
   const token = req.cookies?.portfolio_admin;
   if (!token) throw new ApiError(401, 'Please sign in to continue.');
   let payload;
@@ -18,9 +18,16 @@ export const requireAdmin = asyncHandler(async (req, _res, next) => {
     throw new ApiError(401, 'Your session has expired. Please sign in again.');
   }
   const user = await User.findById(payload.sub);
-  if (!user || payload.version !== user.sessionVersion)
+  if (!user || user.disabled || payload.version !== user.sessionVersion)
     throw new ApiError(401, 'Your session has expired. Please sign in again.');
-  if (user.role !== 'admin') throw new ApiError(403, 'Administrator access is required.');
   req.user = user;
   next();
 });
+export const requireAdmin = [
+  requireAuth,
+  (req, _res, next) => {
+    if (req.user.role !== 'admin')
+      return next(new ApiError(403, 'Administrator access is required.'));
+    next();
+  },
+];

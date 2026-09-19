@@ -4,7 +4,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
-import morgan from 'morgan';
+import { requestLog } from './middleware/requestLog.js';
 import { env } from './config/env.js';
 import authRoutes from './routes/authRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
@@ -13,6 +13,7 @@ import { requestSecurity } from './middleware/requestSecurity.js';
 import { errorHandler, notFound } from './middleware/errorHandler.js';
 const app = express();
 app.disable('x-powered-by');
+app.use(requestLog);
 app.set('trust proxy', env.trustProxy);
 app.use(helmet());
 app.use(
@@ -24,7 +25,6 @@ app.use(
 );
 app.use(express.json({ limit: '256kb' }));
 app.use(cookieParser());
-if (env.nodeEnv !== 'test') app.use(morgan('tiny'));
 app.get('/health', (_req, res) => {
   const ready = mongoose.connection.readyState === 1;
   res
@@ -48,6 +48,10 @@ const limiter = (max) =>
     },
   });
 app.use('/api/auth/login', limiter(15));
+app.use('/api/auth/admin/login', limiter(15));
+app.use('/api/auth/signup', limiter(15));
+app.use('/api/auth/google', limiter(40));
+app.use('/api/auth/google/complete', limiter(15));
 app.use('/api/auth/password', limiter(10));
 app.use('/api/auth', authRoutes);
 app.use('/api/public', publicRoutes);

@@ -48,7 +48,7 @@ export default function ProfileEditor({ notify }) {
       <div className="cms-page-heading">
         <div>
           <p className="eyebrow">Workspace / identity</p>
-          <h1>Profile & About</h1>
+          <h1>Identity</h1>
           <p>Your introduction, biography, image, and key actions.</p>
         </div>
       </div>

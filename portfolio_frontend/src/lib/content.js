@@ -1,4 +1,5 @@
 export const emptyContent = {
+  sections: {},
   profile: null,
   navigation: [],
   projects: [],

@@ -1,35 +1,29 @@
-# Backend
+# Backend architecture
 
-server.js connects to MongoDB before listening; startup failure exits rather than pretending the API is ready. SIGINT/SIGTERM close HTTP connections and disconnect Mongoose. app.js is separate for in-process API tests.
+server.js connects to MongoDB before listening and handles SIGINT/SIGTERM, listen failures, uncaught exceptions, and unhandled rejections with bounded shutdown and log flushing. app.js is independent for API tests.
 
-## Request pipeline
+## Pipeline
 
-1. Disable identifying Express header; set trusted proxy count.
-2. Helmet security headers and explicit credentialed CORS.
-3. JSON body parsing (256 KiB maximum) and cookies.
-4. Database-aware /health endpoint.
-5. /api mutation-origin/custom-header checks.
-6. no-store responses for auth/admin, auth/admin rate limits.
-7. Route authorization, Zod validation, controller, model/service.
-8. Central not-found and safe error mapping.
+Request ID/timing → Helmet → explicit credentialed CORS → JSON/cookies → database-aware health → mutation-origin/custom-header checks → no-store auth/admin headers → rate limits → authorization → Zod validation → controller/service/Mongoose → centralized error mapping.
 
-Controllers use validated bodies only. Zod strips unknown object keys, bounds content, validates URLs and IDs, and handles field-specific errors. Mongoose supplies persistence, schema constraints, timestamps, and indexes. Plain text renders escaped in React; no untrusted HTML renderer is used.
-
-The showroom service validates project references and resolves one effective enabled default using a single settings document. Removing a project clears its showroom references; it does not remove the experience itself. This is a small CMS, not a transactional workflow engine.
+JSON is limited to 256 KiB. Resume multipart uploads are separately limited to one PDF up to 5 MB, after admin authorization. Plain text remains escaped by React; no untrusted HTML rendering.
 
 ## Modules
 
-- config/env.js: environment policy and production checks.
-- config/database.js: connection lifecycle.
-- routes/authRoutes.js: login, session, logout, password change.
-- routes/publicRoutes.js: filtered public lists/bootstrap/details.
-- routes/adminRoutes.js: authenticated CRUD and dashboard.
-- controllers/contentController.js: resource operations and filtering.
-- services/seedContent.js: insert-only initial content.
-- middleware/errorHandler.js: 400/401/403/404/409/413/422/429/500 responses.
-- scripts/seed.js: explicit administrator bootstrap.
-- scripts/qa-server.js: isolated browser fixture, development/test use only.
+- config: module-relative environment loading, production checks, database lifecycle.
+- routes: public, shared auth, and role-protected admin namespaces.
+- controllers: content CRUD/filtering, structured sections, resume, auth/Google flow, users/operations.
+- services: session issuance, Google verification, recursive PDF inspection, logging, showroom defaults/relations, seed rules.
+- models: content, users, Resume, ContentSection, and expiring AuthAttempt records.
+- middleware: authentication, request security/logging, validation, safe errors.
+- scripts: explicit admin/content seed and an isolated browser-test server.
 
-V1 lists are not paginated: they are intended for a personal portfolio, not an unbounded data platform. Rate-limit counters are process-local; a horizontally scaled deployment needs a shared store. API responses never intentionally return password hashes, stack traces, or private setting keys in public bootstrap.
+Google's official server library verifies ID-token signatures/audience/issuer/expiry; the service additionally requires verified email and matching nonce. Only verified profile identifiers are retained, never Google access/refresh/ID tokens. See [security](SECURITY.md).
 
-See [API](API.md), [database](DATABASE.md), and [security](SECURITY.md).
+## Logging and storage
+
+Winston JSON files: combined.log, error.log, http.log, auth.log, admin.log. Each category rotates at 5 MB with five retained files. Metadata is whitelisted; no headers, request bodies, query strings, passwords/hashes, JWTs, or Google tokens are recorded. Request IDs correlate response headers and events. Operations exposes safe configuration/status and the latest 50 non-HTTP events from the current process, not arbitrary file access.
+
+Tests disable default file logging; a dedicated test creates isolated log files to assert category output and redaction. Resume files and logs need durable private storage; prior PDF versions remain private for recovery. PDF validation is not malware scanning.
+
+User lists paginate 25 records; editorial content lists do not paginate. Rate limits and the event window are process-local. Multiple API instances require shared rate-limit infrastructure and shared file storage, plus a log collector.

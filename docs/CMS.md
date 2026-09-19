@@ -1,53 +1,53 @@
 # CMS operating guide
 
-Sign in at /admin using the explicitly seeded account. Existing credentials survive reseeding; change your password under Account. No signup/reset-email flow is provided.
+Sign in at /admin with your seeded administrator. Normal user accounts cannot edit content. Existing administrator credentials survive reseeding. Save feedback appears only after a successful API response; invalid forms keep their edits and show validation errors.
 
-## Sections
+## Modules
 
-- **Dashboard:** actual published project, enabled showroom/navigation, and visible skill counts plus recently edited projects.
-- **Profile & About:** name, initials/image, introduction, biography, availability/location, focus areas, resume, and two link labels/destinations.
-- **Skills:** category grouping, description, display order, visibility.
-- **Projects:** full catalogue entries, safe external links, up to eight screenshot URLs, technologies, status/year, featured/published/archive controls.
-- **Showroom:** independent presentation configuration, actual project dropdown, integration/full URLs, default, order, enabled/status.
-- **Navigation:** labels, destination type, order, enablement, and separate desktop/mobile visibility.
-- **Pages:** small plain-text pages such as Experience. Not a blog or HTML editor.
-- **Social links:** one shared list for Contact and footer.
-- **Site settings:** metadata/contact/footer text.
-- **Account:** authenticated password change.
+| Screen          | Controls                                                                                                               |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Dashboard       | Actual content/user counts, resume status, section update time, recent projects                                        |
+| Hero            | Home intro, image override, headline/greeting, ordered CTA entries, visibility                                         |
+| Identity        | Shared developer name, initials/image, biography, availability, focus, default actions                                 |
+| Profile details | Introduction, current focus, education, highlights/interests/achievements                                              |
+| About           | Narrative, principles and structured experience                                                                        |
+| Skills          | Flexible categories, icon URL, description/order/visibility                                                            |
+| Projects        | Full CRUD, descriptions/images/tech/links/status/year, publication/feature/archive/order                               |
+| Showroom        | Associated project, compact-selector label, embed/live/GitHub links, technologies, fallback copy, default/status/order |
+| Resume          | Metadata, visibility, download action, PDF upload/removal and related links                                            |
+| Contact         | Email/copy/action, email/social visibility, note                                                                       |
+| Social links    | Shared platform URLs and enablement/order                                                                              |
+| Navigation      | Labels/routes/order, desktop/mobile visibility; does not redefine system routes                                        |
+| Footer          | Copyright and social visibility, useful links                                                                          |
+| Themes          | Five allowed palettes, default and system preference policy                                                            |
+| Pages           | Published plain-text custom routes                                                                                     |
+| Site settings   | Metadata/contact defaults; never secrets                                                                               |
+| Users           | Paginated accounts; suspend/restore normal users without changing admin roles                                          |
+| Account         | Change current administrator password                                                                                  |
+| Operations      | Current database/configuration/uptime and redacted process events                                                      |
 
-Saving displays success only after the API accepts the change. Failed saves keep edits and expose field errors. Delete requires confirmation and cannot be undone through the CMS; restore from your database backup if needed.
+Structured repeaters provide add/remove and up/down controls. Education/experience entries have separate title, organization, period and description fields. Multiline lists use one entry per line. Do not fabricate achievements or experience to fill empty sections.
 
-## Publishing workflow
+## Publishing and navigation
 
-1. Create the project as a draft and enter truthful descriptions and links.
-2. Check the content, then enable Published. Archived / hidden overrides publication.
-3. Optionally add a Showroom entry linked to that project. Its enabled/status flags are independent.
-4. Open the public route to verify the result.
+Create projects as drafts, review, then publish. Archived overrides publication. Showroom enablement is independent of project publication; an unpublished association's details are not exposed publicly. Disable the showroom entry too when hiding an experience.
 
-To hide an experience entirely, disable its showroom entry as well as unpublishing its project. If a deleted/unpublished project was associated, the entry still exists but its private project data will not appear publicly.
+The primary route order is Home → Profile → Skills → Work → Showroom → Resume → About → Contact. Enabled CMS routes determine footer/scroll sequence. Known old anchors map to their separate routes. Custom pages must be published before linking; external destinations use full HTTP(S) URLs. Future action navigation stays disabled. Changing a slug changes its URL without automatic redirects; update related navigation.
 
-## Navigation and Experience
+Ordering uses smaller integers first. Deletion asks for confirmation and has no CMS undo; recover deleted database records from backup.
 
-Use route destinations such as /work or /showroom. Anchor destinations such as #contact point to the homepage section from any route. External entries require a full HTTP(S) URL. Action entries are reserved; they must remain disabled.
+## Resume
 
-For Experience, publish a Page with slug experience and add a route Navigation entry /experience. Creating a navigation label alone does not implement an arbitrary new screen. Renaming a page/project slug changes its URL without creating a redirect.
+Upload a trusted, unencrypted PDF of 1–50 pages, at most 5 MB, without scripts/forms/attachments. Upload updates the last-updated date; title, description, visibility, links and download availability are saved separately.
 
-Order uses smaller integers first, with deterministic ID tie-breaking. This applies to projects, navigation, skills, socials, and showroom items. Disable items without deleting to retain content for later.
+An uploaded PDF takes priority over externalUrl; legacy Identity resumeUrl remains a fallback when neither is configured. Removing a current PDF detaches it from publication; its bytes and previous versions remain private for operator recovery. If an external URL exists, it becomes active after detachment.
 
-## Showroom and settings
+The public page reuses Profile education/achievements, About experience, Skills and Projects. Optional preview has an external-document fallback. A viewable PDF can be saved even when the download action is hidden; this setting is not access control.
 
-Choose iframe for a real independently hosted app, or coming-soon for future work. Both Presentation and Availability must permit live display. A disabled item cannot be the default. If the selected default disappears, the first enabled item opens instead.
+## Themes and settings
 
-Recognized public settings:
+Visitor theme preference persists and overrides the first-visit default while enabled. At least one theme and the default must remain enabled. Fieldwork uses the stored key terminal.
 
-| Key             | Meaning                               |
-| --------------- | ------------------------------------- |
-| siteName        | Document title base                   |
-| siteDescription | Default page description              |
-| siteUrl         | Public site origin for canonical URLs |
-| footerLine      | Shared footer text                    |
-| contactEmail    | Contact mailto destination            |
+Recognized public settings: siteName, siteDescription, siteUrl, contactEmail, and legacy footerLine. Footer content is now controlled by its dedicated module. defaultShowroomId is internal and cannot be edited through generic Settings.
 
-Other setting keys stay out of public bootstrap. Never use this collection for credentials. defaultShowroomId is internally managed.
-
-Image/resume fields are URLs: upload assets to your own trusted hosting, then paste their HTTPS links. Missing/broken optional images do not block text content.
+Images remain HTTPS URL fields. Google credentials and storage paths are environment configuration, never CMS content.

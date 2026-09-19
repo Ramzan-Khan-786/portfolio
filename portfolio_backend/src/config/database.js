@@ -1,10 +1,11 @@
 import mongoose from 'mongoose';
 import { env } from './env.js';
+import { audit } from '../services/logger.js';
 
 export async function connectDatabase() {
   mongoose.set('strictQuery', true);
   await mongoose.connect(env.mongoUri);
-  console.info(`MongoDB connected: ${mongoose.connection.host}/${mongoose.connection.name}`);
+  audit('application', 'database.connected');
 }
 
 export async function disconnectDatabase() {

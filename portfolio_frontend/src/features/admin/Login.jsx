@@ -23,7 +23,7 @@ export default function Login({ onLogin }) {
     setError('');
     setBusy(true);
     try {
-      const data = await apiClient.login(values);
+      const data = await apiClient.adminLogin(values);
       onLogin(data.user);
     } catch (failure) {
       setError(failure.message);

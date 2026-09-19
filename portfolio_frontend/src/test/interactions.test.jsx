@@ -6,7 +6,9 @@ import { ContentImage } from '../components/Ui.jsx';
 import ResourceManager from '../features/admin/ResourceManager.jsx';
 import Login from '../features/admin/Login.jsx';
 import { apiClient } from '../lib/api.js';
-vi.mock('../lib/api.js', () => ({ apiClient: { get: vi.fn(), save: vi.fn(), login: vi.fn() } }));
+vi.mock('../lib/api.js', () => ({
+  apiClient: { get: vi.fn(), save: vi.fn(), adminLogin: vi.fn() },
+}));
 vi.mock('../context/PortfolioContext.jsx', () => ({
   usePortfolio: () => ({
     refresh: vi.fn(),
@@ -44,7 +46,7 @@ describe('critical UI interactions', () => {
     expect(screen.queryByLabelText('Mobile navigation')).not.toBeInTheDocument();
   });
   it('shows login failures from the server', async () => {
-    apiClient.login.mockRejectedValue(new Error('Invalid email or password.'));
+    apiClient.adminLogin.mockRejectedValue(new Error('Invalid email or password.'));
     show(<Login onLogin={vi.fn()} />);
     fireEvent.change(screen.getByLabelText(/Email/), { target: { value: 'test@example.com' } });
     fireEvent.change(screen.getByLabelText(/Password/), { target: { value: 'wrongpassword' } });

@@ -1,39 +1,30 @@
 # Architecture
 
-## Boundaries
-
 ```text
-Browser (React public site / administrator workspace)
-  → /api via same-origin proxy or explicitly allowed API origin
-  → Express: headers → JSON → mutation checks → route authorization → validation
-  → controllers / showroom and seed services
-  → Mongoose → MongoDB
+Public pages / account screens / admin CMS (React)
+  → shared /api fetch client with credentials and mutation header
+  → Express security, rate limits, role authorization, Zod validation
+  → controllers and domain services
+  → MongoDB content, users, single-use auth attempts, resume metadata
+  → private filesystem for current/previous PDFs and rotating logs
 
-Showroom selection → independent app in a constrained cross-origin iframe
+Showroom → constrained independent-origin iframe (no account/token bridge)
 ```
 
-MongoDB is the content source of truth. The frontend owns interaction/layout, not a duplicated catalogue. Work is the published project catalogue; Showroom is an independently ordered list of interactive or upcoming experiences. A project may exist without a showroom entry.
+MongoDB is the source of truth. Public bootstrap contains identity, published project summaries, visible skills, enabled showroom/navigation/socials, allowlisted settings, and page-section overrides. Project details and resume metadata load separately. CMS saves refresh the current tab's public context; there is no realtime push to other visitors.
 
-## Repository
+## Frontend
 
-- `portfolio_frontend/src/components`: public sections and reusable UI.
-- `portfolio_frontend/src/pages`: layouts, route-level screens, CMS shell.
-- `portfolio_frontend/src/features/admin`: resource definitions, forms, dashboard, authentication UI.
-- `portfolio_frontend/src/context`: shared public bootstrap with loading/error/refresh.
-- `portfolio_frontend/src/lib`: API and safe content helpers.
-- `portfolio_backend/src/routes`: public, authentication, admin namespaces.
-- `portfolio_backend/src/controllers`: HTTP use cases.
-- `portfolio_backend/src/models`: persisted schemas and indexes.
-- `portfolio_backend/src/services`: showroom defaults/relations and non-overwriting seed.
-- `portfolio_backend/src/middleware`: authorization, origin checks, validation, errors.
-- `tests/e2e`: browser → API → isolated MongoDB → public UI scenarios.
+PublicLayout is a three-row viewport frame: persistent header, independently scrolling route view, persistent footer. Routes are actual React Router pages, not anchor sections in one long landing page. CSS provides 340 ms entry motion. Boundary navigation requires a fresh gesture and is disabled for reduced motion, user opt-out, and Showroom. Browser history retains route scroll positions.
 
-## Decisions and tradeoffs
+PortfolioProvider, AuthProvider, and ThemeProvider each own one concern. The same AuthProvider serves account and admin routes; roles are enforced again by the API. Admin, showroom, resume, and auth screens are lazy chunks. Tailwind handles routine layout; page/component CSS owns distinctive composition.
 
-React Router provides real route views and client-side 404s. Single-segment custom routes resolve published simple text pages. The SPA host must rewrite non-API/non-asset paths to index.html; the host may return HTTP 200 for a client-rendered 404. There is no SSR or universal server-rendered social-preview metadata.
+## Backend
 
-Public bootstrap contains only public content and lightweight project summaries. Full descriptions/screenshots load on detail routes. Admin and Showroom chunks are lazy-loaded. Mutations refresh public content in the current tab; other visitors receive updates on the next fetch/page load, not through realtime push.
+Public, auth, and admin namespaces preserve the existing contracts. requireAuth checks the cookie signature, expiry, session version, and account status. requireAdmin adds the database role check. Google verification and PDF inspection are services, not browser-trusted claims.
 
-CSS is colocated with its owner; Tailwind handles routine layout. The global stylesheet contains tokens, reset, focus, and motion defaults. Backend and frontend can be deployed independently, but a same-origin proxy simplifies cookies.
+ContentSection adds structured optional overrides without replacing Profile/Project/Skill records. Resume is a keyed singleton; uploads are UUID-named private files. AuthAttempt stores hashed random proofs with expiry, consumed atomically during Google challenge/completion. Logger whitelists event metadata and rotates category files.
 
-V1 has one administrative role, no registration, public messaging, uploads, rich-text HTML, AI, blog, or analytics pipeline. Image/resume links point to externally hosted assets. Additional functionality needs an actual implementation, not just a navigation record.
+## Limits
+
+SPA metadata/404s are client-rendered. Rate-limit counters and recent operational events are process-local. Content lists are bounded editorial datasets, while user management is paginated. File storage requires a persistent single-service/shared-volume topology. No MFA, password-reset email, direct-signup email confirmation, analytics pipeline, rich HTML editor, image upload service, or portfolio-to-embedded-app SSO is provided.

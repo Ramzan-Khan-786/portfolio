@@ -23,6 +23,10 @@ const sameSite = process.env.COOKIE_SAME_SITE || 'lax';
 if (!['lax', 'strict', 'none'].includes(sameSite) || (sameSite === 'none' && !secure))
   throw new Error('SameSite=None requires secure cookies.');
 export const env = {
+  googleClientId: process.env.GOOGLE_CLIENT_ID || '',
+  uploadDir:
+    process.env.UPLOAD_DIR || fileURLToPath(new URL('../../uploads/resumes', import.meta.url)),
+  logDir: process.env.LOG_DIR || fileURLToPath(new URL('../../logs', import.meta.url)),
   nodeEnv: process.env.NODE_ENV || 'development',
   port: Number(process.env.PORT || 5000),
   mongoUri: process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/ramzan_portfolio',

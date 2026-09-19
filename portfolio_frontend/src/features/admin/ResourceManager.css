@@ -1,8 +1,8 @@
 .cms-records {
-  border: 1px solid #d9e0d8;
+  border: 1px solid var(--border);
   border-radius: 0.5rem;
   overflow-x: auto;
-  background: white;
+  background: var(--surface);
 }
 .cms-records table {
   border-collapse: collapse;
@@ -12,16 +12,16 @@
   font:
     0.68rem ui-monospace,
     monospace;
-  color: #627467;
+  color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.04em;
   text-align: left;
-  background: #f7f9f5;
+  background: var(--raised);
 }
 .cms-records th,
 .cms-records td {
   padding: 0.85rem 1rem;
-  border-bottom: 1px solid #e2e7df;
+  border-bottom: 1px solid var(--border);
 }
 .cms-records td {
   font-size: 0.84rem;
@@ -38,14 +38,14 @@
 .cms-record-actions button {
   min-height: 44px;
   min-width: 44px;
-  color: #294a3b;
+  color: var(--accent);
   text-decoration: underline;
   text-underline-offset: 4px;
 }
 .cms-record-actions .cms-delete {
   display: inline-grid;
   place-items: center;
-  color: #a84932;
+  color: var(--danger);
   margin-left: 0.5rem;
   vertical-align: middle;
 }
@@ -61,7 +61,7 @@
     display: none;
   }
   .cms-records tr {
-    border-bottom: 1px solid #d9e0d8;
+    border-bottom: 1px solid var(--border);
     padding: 0.7rem 1rem;
   }
   .cms-records td {
@@ -76,7 +76,7 @@
   }
   .cms-records td[data-label]::before {
     content: attr(data-label);
-    color: #617367;
+    color: var(--muted);
     font:
       0.65rem ui-monospace,
       monospace;

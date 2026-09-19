@@ -42,12 +42,19 @@ export default function Dashboard() {
         <>
           <div className="grid gap-px overflow-hidden rounded-md border border-line bg-line sm:grid-cols-2 xl:grid-cols-4">
             {[
+              ['Total projects', stats.projects, 'projects'],
               ['Published projects', stats.liveProjects, 'projects'],
+              ['Registered users', stats.users, 'users'],
+              [
+                'Resume',
+                stats.resume?.hasFile ? 'PDF' : stats.resume?.externalUrl ? 'Linked' : 'No file',
+                'resume',
+              ],
               ['Showroom items', stats.showroom, 'showroom'],
               ['Visible skills', stats.skills, 'skills'],
               ['Navigation items', stats.navigation, 'navigation'],
             ].map(([label, number, route]) => (
-              <Link key={label} to={'/admin/' + route} className="bg-white p-6 hover:bg-stone-50">
+              <Link key={label} to={'/admin/' + route} className="bg-surface p-6 hover:bg-stone-50">
                 <strong className="block text-4xl font-medium tracking-tight text-moss">
                   {number}
                 </strong>
@@ -56,6 +63,12 @@ export default function Dashboard() {
             ))}
           </div>
           <div className="cms-editor mt-6">
+            <p className="text-xs text-muted mb-4">
+              Latest section update:{' '}
+              {stats.lastContentUpdate
+                ? new Date(stats.lastContentUpdate).toLocaleString()
+                : 'No section overrides yet'}
+            </p>
             <h2 className="mb-4 text-lg font-semibold">Recently updated projects</h2>
             {stats.recent?.length ? (
               <ul className="divide-y divide-line">

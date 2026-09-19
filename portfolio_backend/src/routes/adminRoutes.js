@@ -1,4 +1,15 @@
 import { Router } from 'express';
+import { getSection, putSection } from '../controllers/sectionController.js';
+import {
+  getResume,
+  putResume,
+  storeResume,
+  uploadPdf,
+  detachResume,
+} from '../controllers/resumeController.js';
+import { resumeSchema } from '../validation/sections.js';
+import { users, setUserStatus, operations } from '../controllers/systemController.js';
+import { userStatusSchema } from '../validation/schemas.js';
 import {
   create,
   dashboard,
@@ -23,6 +34,15 @@ import {
 
 const router = Router();
 router.use(requireAdmin);
+router.get('/users', users);
+router.put('/users/:id', validate(userStatusSchema), setUserStatus);
+router.get('/operations', operations);
+router.get('/content/:key', getSection);
+router.put('/content/:key', putSection);
+router.get('/resume', getResume);
+router.put('/resume', validate(resumeSchema), putResume);
+router.post('/resume/file', uploadPdf, storeResume);
+router.delete('/resume/file', detachResume);
 router.get('/dashboard', dashboard);
 router.get('/profile', getProfile);
 router.put('/profile', validate(profileSchema), updateProfile);

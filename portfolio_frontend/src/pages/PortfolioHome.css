@@ -1,0 +1,211 @@
+.home-page {
+  padding-block: 2.1rem 2.4rem;
+}
+.home-topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+.home-topline .eyebrow {
+  margin: 0;
+}
+.availability {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.68rem;
+  color: var(--secondary);
+}
+.availability i {
+  width: 5px;
+  height: 5px;
+  background: var(--accent);
+  border-radius: 100%;
+  flex-shrink: 0;
+}
+.home-composition {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(240px, 0.6fr);
+  gap: clamp(3rem, 8vw, 8rem);
+  align-items: center;
+  padding-block: clamp(2.4rem, 5vw, 4.5rem);
+}
+.home-greeting {
+  font-size: 0.88rem;
+  color: var(--secondary);
+  margin-bottom: 0.7rem;
+}
+.home-intro h1 {
+  font-size: clamp(2.7rem, 5.2vw, 4.7rem);
+  letter-spacing: -0.065em;
+  line-height: 1.1;
+  font-weight: 550;
+}
+.name-period {
+  color: var(--accent);
+}
+.home-intro h2 {
+  font-size: clamp(1.2rem, 2.2vw, 1.8rem);
+  color: var(--secondary);
+  max-width: 30ch;
+  line-height: 1.4;
+  margin-top: 1.2rem;
+  letter-spacing: -0.025em;
+}
+.home-description {
+  max-width: 56ch;
+  line-height: 1.85;
+  font-size: 0.9rem;
+  color: var(--muted);
+  margin-top: 1.3rem;
+}
+.home-aside {
+  display: grid;
+  gap: 1.5rem;
+}
+.home-portrait {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1.2;
+  max-height: 235px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  overflow: hidden;
+}
+.home-portrait > span:first-child {
+  font:
+    300 clamp(3rem, 6vw, 5rem) ui-monospace,
+    monospace;
+  letter-spacing: -0.08em;
+  color: var(--accent);
+}
+.home-portrait > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.portrait-caption {
+  position: absolute;
+  bottom: 0;
+  inset-inline: 0;
+  border-top: 1px solid var(--border);
+  padding: 0.7rem 1rem;
+  font:
+    0.6rem ui-monospace,
+    monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  background: var(--surface);
+  color: var(--secondary);
+}
+.home-focus > span {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  font-size: 0.8rem;
+  margin-top: 0.6rem;
+  color: var(--secondary);
+}
+.focus-mark {
+  color: var(--accent);
+  font-family: monospace;
+}
+.home-bottom {
+  display: grid;
+  grid-template-columns: 1.35fr 0.85fr;
+  gap: 3.5rem;
+  border-top: 1px solid var(--border);
+  padding-top: 1.3rem;
+}
+.home-project {
+  display: grid;
+  grid-template-columns: 25px 1fr 20px;
+  gap: 1rem;
+  align-items: center;
+  min-height: 74px;
+  border-top: 1px solid var(--border);
+  text-decoration: none;
+}
+.home-project strong {
+  font-size: 0.88rem;
+  font-weight: 550;
+}
+.home-project small {
+  display: block;
+  color: var(--muted);
+  font-size: 0.66rem;
+  margin-top: 0.3rem;
+}
+.home-project:hover strong {
+  color: var(--accent);
+}
+.home-stack {
+  border-left: 1px solid var(--border);
+  padding-left: 2.5rem;
+  padding-top: 1rem;
+}
+.home-stack > div > span {
+  font-size: 0.8rem;
+  color: var(--secondary);
+}
+.home-index-link {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  border-top: 1px solid var(--border);
+  margin-top: 1.5rem;
+  padding-block: 1rem;
+  font:
+    0.64rem ui-monospace,
+    monospace;
+  color: var(--muted);
+}
+@media (max-width: 760px) {
+  .home-composition {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  .home-aside {
+    grid-template-columns: 130px 1fr;
+    align-items: center;
+  }
+  .home-portrait {
+    aspect-ratio: 1;
+  }
+  .home-focus .eyebrow {
+    margin-bottom: 0.6rem;
+  }
+  .home-bottom {
+    grid-template-columns: 1fr;
+    gap: 1.2rem;
+  }
+  .home-stack {
+    border-left: 0;
+    border-top: 1px solid var(--border);
+    padding: 1.5rem 0 0;
+  }
+  .home-topline {
+    align-items: start;
+    flex-direction: column;
+    gap: 0.7rem;
+  }
+  .home-intro h1 {
+    font-size: clamp(2.5rem, 9vw, 4rem);
+  }
+}
+@media (max-width: 390px) {
+  .home-aside {
+    grid-template-columns: 100px 1fr;
+    gap: 1rem;
+  }
+  .home-focus > span {
+    font-size: 0.72rem;
+  }
+  .home-index-link {
+    flex-wrap: wrap;
+  }
+}

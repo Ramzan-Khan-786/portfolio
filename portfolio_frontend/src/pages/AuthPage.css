@@ -1,0 +1,118 @@
+.auth-page {
+  display: grid;
+  grid-template-columns: 1fr 420px;
+  gap: clamp(3rem, 8vw, 8rem);
+  align-items: start;
+  padding-block: clamp(3rem, 8vh, 7rem);
+}
+.auth-intro {
+  max-width: 510px;
+}
+.auth-intro h1 {
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  font-weight: 550;
+  letter-spacing: -0.05em;
+  line-height: 1.12;
+  margin: 1rem 0 1.5rem;
+}
+.auth-intro > p:not(.eyebrow) {
+  font-size: 0.95rem;
+  line-height: 1.85;
+  color: var(--secondary);
+}
+.auth-intro > .text-link {
+  display: inline-flex;
+  margin-top: 2rem;
+}
+.auth-panel {
+  border-top: 2px solid var(--accent);
+  padding-top: 2rem;
+}
+.auth-panel .grid {
+  grid-template-columns: 1fr;
+}
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: var(--muted);
+  font-size: 0.7rem;
+  margin: 1.7rem 0;
+}
+.auth-divider:before,
+.auth-divider:after {
+  content: '';
+  height: 1px;
+  flex: 1;
+  background: var(--border);
+}
+.google-signin {
+  min-width: 0;
+  font-size: 0.8rem;
+  color: var(--secondary);
+  line-height: 1.65;
+}
+.google-signin > div {
+  max-width: 100%;
+  overflow: hidden;
+}
+.auth-switch {
+  font-size: 0.8rem;
+  color: var(--secondary);
+  margin-top: 2rem;
+}
+.auth-switch a {
+  color: var(--accent);
+  text-decoration: underline;
+  margin-left: 0.4rem;
+}
+.auth-verified {
+  font-size: 0.8rem;
+  line-height: 1.7;
+  color: var(--secondary);
+  padding: 1rem;
+  border: 1px solid var(--border);
+  margin-bottom: 1.5rem;
+  overflow-wrap: anywhere;
+}
+.account-layout {
+  max-width: 760px;
+}
+.account-identity {
+  padding-block: 2rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 2rem;
+}
+.account-identity h1 {
+  font-size: 2rem;
+  font-weight: 550;
+  letter-spacing: -0.04em;
+}
+.account-layout .cms-page-heading h1 {
+  font-size: 1.2rem;
+}
+.account-layout .cms-page-heading .eyebrow {
+  display: none;
+}
+.account-layout .cms-page-heading p {
+  font-size: 0.85rem;
+  color: var(--secondary);
+  margin-top: 0.5rem;
+}
+.account-layout .cms-editor {
+  margin-top: 1.5rem;
+}
+.account-layout {
+  padding-bottom: 3rem;
+}
+@media (max-width: 850px) {
+  .auth-page {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+    max-width: 560px;
+    padding-block: 2.5rem;
+  }
+  .auth-intro h1 {
+    font-size: 2.25rem;
+  }
+}

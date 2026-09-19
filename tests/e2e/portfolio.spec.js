@@ -6,6 +6,14 @@ async function fits(page) {
     width: document.documentElement.scrollWidth,
   }));
   expect(sizes.width).toBeLessThanOrEqual(sizes.viewport + 1);
+  const footer = page.locator('.site-footer');
+  if (await footer.count()) {
+    const box = await footer.boundingBox();
+    expect(Math.round(box.y + box.height)).toBeLessThanOrEqual(page.viewportSize().height + 1);
+    expect(
+      await page.locator('.page-scroll').evaluate((el) => el.scrollWidth <= el.clientWidth + 1),
+    ).toBe(true);
+  }
 }
 async function capture(page, path) {
   await page.evaluate(async () => {
@@ -21,13 +29,15 @@ async function login(page) {
   await page.getByRole('button', { name: 'Sign in', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Your portfolio, in one place.' })).toBeVisible();
 }
-test('public pages and showroom work at eight representative widths', async ({ page }) => {
-  const errors = [];
-  page.on('pageerror', (error) => errors.push(error.message));
-  for (const width of widths) {
+for (const width of widths)
+  test('public pages and showroom fit ' + width + 'px', async ({ page }) => {
+    const errors = [];
+    page.on('pageerror', (error) => errors.push(error.message));
     await page.setViewportSize({ width, height: 900 });
     for (const path of [
       '/',
+      '/profile',
+      '/resume',
       '/skills',
       '/work',
       '/work/typewriter',
@@ -46,40 +56,43 @@ test('public pages and showroom work at eight representative widths', async ({ p
           'artifacts/qa/' + (path === '/' ? 'profile' : 'showroom') + '-' + width + '.png',
         );
     }
-  }
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto('/');
-  await page.getByRole('button', { name: 'Open menu' }).click();
-  await expect(page.getByRole('navigation', { name: 'Mobile navigation' })).toBeVisible();
-  await page.keyboard.press('Escape');
-  await expect(page.getByRole('navigation', { name: 'Mobile navigation' })).not.toBeVisible();
-  await page.getByRole('button', { name: 'Open menu' }).click();
-  await page
-    .getByRole('navigation', { name: 'Mobile navigation' })
-    .getByRole('link', { name: 'Showroom' })
-    .click();
-  await expect(page).toHaveURL(/showroom/);
-  const frame = page.frameLocator('iframe');
-  await frame.getByLabel('Test text').fill('Working independently');
-  await expect(frame.getByText('21 characters')).toBeVisible();
-  await page.getByRole('tab', { name: /Next experiment/ }).click();
-  await expect(page.getByRole('tabpanel').getByText('Coming soon', { exact: true })).toBeVisible();
-  await expect(page.locator('.showroom-window')).toHaveClass(/from-right/);
-  await page.screenshot({ path: 'artifacts/qa/coming-soon-390.png', fullPage: true });
-  await page.keyboard.press('ArrowLeft');
-  await expect(page.locator('.showroom-window')).toHaveClass(/from-left/);
-  await expect(page.getByRole('tab', { name: /TypeWriter/ })).toHaveAttribute(
-    'aria-selected',
-    'true',
-  );
-  await page.goto('/missing/page');
-  await expect(page.getByRole('heading', { name: 'This page isn’t here.' })).toBeVisible();
-  expect(errors).toEqual([]);
-});
+    if (width === 390) {
+      await page.setViewportSize({ width: 390, height: 844 });
+      await page.goto('/');
+      await page.getByRole('button', { name: 'Open menu' }).click();
+      await expect(page.getByRole('navigation', { name: 'Mobile navigation' })).toBeVisible();
+      await page.keyboard.press('Escape');
+      await expect(page.getByRole('navigation', { name: 'Mobile navigation' })).not.toBeVisible();
+      await page.getByRole('button', { name: 'Open menu' }).click();
+      await page
+        .getByRole('navigation', { name: 'Mobile navigation' })
+        .getByRole('link', { name: 'Showroom' })
+        .click();
+      await expect(page).toHaveURL(/showroom/);
+      const frame = page.frameLocator('iframe');
+      await frame.getByLabel('Test text').fill('Working independently');
+      await expect(frame.getByText('21 characters')).toBeVisible();
+      await page.getByRole('tab', { name: /Next experiment/ }).click();
+      await expect(
+        page.getByRole('tabpanel').getByText('Coming soon', { exact: true }),
+      ).toBeVisible();
+      await expect(page.locator('.showroom-window')).toHaveClass(/from-right/);
+      await page.screenshot({ path: 'artifacts/qa/coming-soon-390.png', fullPage: true });
+      await page.keyboard.press('ArrowLeft');
+      await expect(page.locator('.showroom-window')).toHaveClass(/from-left/);
+      await expect(page.getByRole('tab', { name: /TypeWriter/ })).toHaveAttribute(
+        'aria-selected',
+        'true',
+      );
+      await page.goto('/missing/page');
+      await expect(page.getByRole('heading', { name: 'This page isn’t here.' })).toBeVisible();
+    }
+    expect(errors).toEqual([]);
+  });
 test('CMS edits persist through API and MongoDB into the public portfolio', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await login(page);
-  await page.getByRole('link', { name: 'Profile & About' }).click();
+  await page.getByRole('link', { name: 'Identity' }).click();
   await page
     .getByLabel('Availability', { exact: true })
     .fill('Available for verified collaborations');
@@ -125,14 +138,14 @@ test('CMS edits persist through API and MongoDB into the public portfolio', asyn
   await page.getByRole('link', { name: 'Navigation', exact: true }).click();
   await page.getByRole('button', { name: 'Add navigation item' }).click();
   await page.getByLabel('Label', { exact: false }).fill('Experience');
-  await page.locator('#field-destination').fill('/experience');
+  await page.getByLabel(/^Destination \*/).fill('/experience');
   await page.getByRole('button', { name: 'Save changes' }).click();
   await expect(page.getByRole('cell', { name: '/experience', exact: true })).toBeVisible();
   await page.getByRole('link', { name: 'Social links', exact: true }).click();
   await page.getByRole('button', { name: 'Add social link' }).click();
   await page.getByLabel('Label', { exact: false }).fill('Email');
   await page.getByLabel('Platform', { exact: false }).fill('email');
-  await page.locator('#field-url').fill('mailto:qa@example.test');
+  await page.getByLabel(/^Destination \*/).fill('mailto:qa@example.test');
   await page.getByRole('button', { name: 'Save changes' }).click();
   await expect(page.getByRole('cell', { name: 'Email', exact: true })).toBeVisible();
   await page.goto('/');
@@ -154,23 +167,30 @@ test('CMS edits persist through API and MongoDB into the public portfolio', asyn
   await expect(page.getByRole('heading', { name: 'Welcome back.' })).toBeVisible();
   expect((await page.request.get('/api/admin/projects')).status()).toBe(401);
 });
-test('admin login, navigation, forms and lists fit all target widths', async ({ page }) => {
-  const errors = [];
-  page.on('pageerror', (error) => errors.push(error.message));
-  for (const width of widths) {
+for (const width of widths)
+  test('admin login, navigation, forms and lists fit ' + width + 'px', async ({ page }) => {
+    const errors = [];
+    page.on('pageerror', (error) => errors.push(error.message));
     await page.setViewportSize({ width, height: 900 });
     await page.goto('/admin');
     await expect(page.getByRole('heading', { name: 'Welcome back.' })).toBeVisible();
     await fits(page);
     if (width === 390)
       await page.screenshot({ path: 'artifacts/qa/login-390.png', fullPage: true });
-  }
-  await login(page);
-  for (const width of widths) {
+    await login(page);
     await page.setViewportSize({ width, height: 900 });
     for (const path of [
       '/admin',
+      '/admin/identity',
+      '/admin/hero',
       '/admin/profile',
+      '/admin/about',
+      '/admin/resume',
+      '/admin/contact',
+      '/admin/footer',
+      '/admin/appearance',
+      '/admin/users',
+      '/admin/system',
       '/admin/projects',
       '/admin/navigation',
       '/admin/showroom',
@@ -188,10 +208,10 @@ test('admin login, navigation, forms and lists fit all target widths', async ({ 
         await expect(
           page.getByRole('heading', { name: 'Recently updated projects' }),
         ).toBeVisible();
-      if (path === '/admin/profile')
+      if (path === '/admin/identity')
         await expect(page.getByRole('button', { name: 'Save profile' })).toBeVisible();
       const add = page.getByRole('button', { name: /^Add / });
-      if (await add.count()) await add.click();
+      if ((await add.count()) === 1) await add.click();
       await fits(page);
       if ([320, 390, 768, 1536].includes(width) && ['/admin', '/admin/showroom'].includes(path))
         await capture(
@@ -203,14 +223,15 @@ test('admin login, navigation, forms and lists fit all target widths', async ({ 
             '.png',
         );
     }
-  }
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.getByRole('button', { name: 'Open CMS menu' }).click();
-  await expect(page.getByRole('navigation', { name: 'CMS navigation' })).toBeVisible();
-  await page.keyboard.press('Escape');
-  await expect(page.getByRole('button', { name: 'Open CMS menu' })).toBeFocused();
-  expect(errors).toEqual([]);
-});
+    if (width < 900) {
+      await page.setViewportSize({ width: 390, height: 844 });
+      await page.getByRole('button', { name: 'Open CMS menu' }).click();
+      await expect(page.getByRole('navigation', { name: 'CMS navigation' })).toBeVisible();
+      await page.keyboard.press('Escape');
+      await expect(page.getByRole('button', { name: 'Open CMS menu' })).toBeFocused();
+    }
+    expect(errors).toEqual([]);
+  });
 test('offline content and missing integration remain usable', async ({ page }) => {
   await page.route('**/api/public/bootstrap', (route) => route.abort());
   await page.goto('/');
@@ -220,7 +241,7 @@ test('offline content and missing integration remain usable', async ({ page }) =
   await expect(page.getByRole('button', { name: 'Try again' })).toBeVisible();
   await page.unroute('**/api/public/bootstrap');
   await page.getByRole('button', { name: 'Try again' }).click();
-  await expect(page.locator('main h1')).toContainText('Building useful software.');
+  await expect(page.locator('main h1')).toContainText('Ramzan Khan');
   await page.route('**/api/public/bootstrap', async (route) => {
     const response = await route.fetch();
     const body = await response.json();

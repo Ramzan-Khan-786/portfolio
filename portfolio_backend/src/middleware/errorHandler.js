@@ -1,4 +1,5 @@
 import { ApiError } from '../utils/ApiError.js';
+import { audit } from '../services/logger.js';
 export function notFound(_req, _res, next) {
   next(new ApiError(404, 'This API route does not exist.'));
 }
@@ -10,7 +11,13 @@ export function errorHandler(error, _req, res, _next) {
     message = error.message;
   } else if (error.code === 11000) {
     status = 409;
-    message = 'That slug or key already exists.';
+    message = 'That email, slug, or key already exists.';
+  } else if (error.name === 'MulterError') {
+    status = error.code === 'LIMIT_FILE_SIZE' ? 413 : 422;
+    message =
+      error.code === 'LIMIT_FILE_SIZE'
+        ? 'Resume PDFs must be under 5 MB.'
+        : 'Upload one PDF file using the file field.';
   } else if (error.name === 'CastError') {
     status = 400;
     message = 'Invalid record identifier.';
@@ -24,8 +31,12 @@ export function errorHandler(error, _req, res, _next) {
     status = 413;
     message = 'Request body is too large.';
   }
-  if (status >= 500 && process.env.NODE_ENV !== 'test')
-    console.error('API request failed:', error.name);
+  if (status >= 500)
+    audit('error', 'application.error', {
+      requestId: _req.requestId,
+      errorName: error.name,
+      status,
+    });
   res.status(status).json({
     ok: false,
     error: {

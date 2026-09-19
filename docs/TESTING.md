@@ -40,12 +40,17 @@ For an already installed Chromium, optionally set QA_BROWSER_PATH to its verifie
 
 Playwright starts the isolated API on 5101, an explicitly labelled independent iframe fixture on 5191, and Vite on 5179. Those ports must be free. Test user credentials exist only in the ephemeral QA database and are never read from your .env. Do not run this fixture as a deployed service.
 
-Four browser scenarios verify:
+Twenty-three browser checks (eight public viewport cases, eight admin viewport cases, and seven flow cases) verify:
 
 1. Public routes at all eight widths, mobile navigation, iframe interaction, Coming Soon, both switch directions, and 404.
 2. Actual CMS login → profile/skill/project/showroom/page/navigation/social writes → MongoDB → public page/detail/default → logout denial.
-3. Login and ten admin routes/editors at every target width, overflow checks, and drawer focus.
+3. Login and all admin modules/editors at every target width, overflow checks, and drawer focus.
 4. Real API failure/retry UI and missing integration behavior.
+5. All five themes, persistence and shared auth/CMS appearance.
+6. Fresh wheel boundaries, momentum locks, browser history and opt-out.
+7. Reduced motion and showroom interaction isolation, including short landscape.
+8. User signup/session/admin denial/password change/logout/login.
+9. Granular section edits and real PDF upload/download publication through the browser.
 
 Do not edit frontend source or run the formatter while these tests run: Vite HMR can interrupt navigation and invalidate screenshot evidence. Run on a stable checkout. Tests use a single browser worker to avoid data races between scenarios.
 
@@ -69,3 +74,9 @@ npm.cmd audit
 ```
 
 Review advisories before applying updates. Do not use force upgrades as a substitute for compatibility testing.
+
+## New V1 security coverage
+
+The API suite also exercises signup role protection, account suspension, verified-Google new-password/account-linking flows, nonce/expiry/replay rejection, structured CMS validation, PDF header/type/size/active-content checks, download/visibility controls, navigation compatibility and categorized file-log redaction. Google tests mock only the external official token verifier, with the real controller/challenge/database/session path running. They do not prove real Google consent or configured client/origin acceptance.
+
+Frontend component tests exercise all themes and fresh wheel/touch boundary guards, in addition to existing forms/showroom/error cases. Browser tests use generated, explicitly test-only PDF content. Temporary PDF/log artifacts remain under ignored artifacts directories.

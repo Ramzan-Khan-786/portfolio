@@ -25,6 +25,7 @@ beforeEach(async () => {
   user = await User.create({
     email: 'admin@test.dev',
     name: 'Test Admin',
+    role: 'admin',
     passwordHash: await bcrypt.hash(password, 4),
   });
   const token = jwt.sign({ sub: user.id, version: 0 }, env.jwtSecret, {

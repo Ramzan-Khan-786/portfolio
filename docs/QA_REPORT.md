@@ -1,43 +1,49 @@
-# Verification report — V1 enhancement
+# Portfolio V1 verification report
 
-Date: 2026-09-18. Workspace: Portfolio. All application work is local; no live deployment or configured CMS database was modified by verification.
+Date: 2026-09-19. Release: 1.2.0. Local Windows / Node 22 / Chromium acceptance, using isolated MongoDB. This report distinguishes automated implementation checks from deployment acceptance.
 
-## Checks
+## Current verified checks
 
-| Check                              | Result                                                                    |
-| ---------------------------------- | ------------------------------------------------------------------------- |
-| ESLint                             | Passed                                                                    |
-| Prettier                           | Passed, including the final documentation                                 |
-| Backend integration + schema tests | 23 passed on Vitest 4.1.11 with isolated MongoDB                          |
-| Frontend component tests           | 9 passed on Vitest 4.1.11                                                 |
-| Production frontend build          | Passed on Vite 6.4.3                                                      |
-| Browser acceptance suite           | 4 passed; final stable run completed in 4.1 minutes                       |
-| Dependency advisories              | Zero reported in root, backend, and frontend after the test-runner update |
-| Lockfile installation validation   | npm ci --dry-run succeeded for all three packages                         |
+| Check | Result |
+| --- | --- |
+| Backend schema/API/database tests | 36 passed |
+| Frontend component/interaction tests | 20 passed |
+| ESLint | Passed |
+| Production Vite build | Passed; main entry approximately 223 KB / 72 KB gzip, with lazy route chunks |
+| Prettier | Passed |
+| Local documentation links | All resolve |
+| git diff --check | Passed |
+| Root/frontend/backend dependency audits | Zero reported vulnerabilities |
+| Final browser regression | In progress: 23 independently timed viewport/flow checks |
 
-The main frontend entry is approximately 67.81 kB gzipped JavaScript and 5.60 kB gzipped CSS, with separate lazy Admin and Showroom chunks. These are build artifact sizes, not a performance benchmark or Lighthouse score.
+The earlier browser pass verified public routes at all eight widths, CMS/database/public round-trips, themes, boundary/history guards, account lifecycle, and resume publication. It exposed a short-landscape showroom sizing issue and an oversized single admin-test timeout. The layout was compacted and responsive sweeps split by viewport; final regression is being rerun.
 
-## Verification scope
+## Scope
 
-API tests exercise real MongoDB persistence with no real .env credentials. Browser scenarios cross the complete CMS UI → authenticated API → MongoDB → public UI boundary. They include public route/detail behavior, published/draft filtering, project associations, default showroom behavior, custom pages/navigation, logout denial, and service failure/retry.
+API tests use the real Express controllers, middleware and temporary MongoDB persistence. Coverage includes normal-user/admin separation, cookies/session revocation, signup validation, suspension, Google nonce/expiry/replay and password/linking flow, CMS/project/showroom contracts, structured sections, PDF type/size/parsing/nested active-content rejection, upload/download/detachment, retained bytes, navigation compatibility and log category/redaction.
 
-Viewport coverage: 320, 375, 390, 430, 768, 1024, 1280, and 1536 pixels. Public and admin screenshots are retained under artifacts/qa; the browser report is playwright-report/index.html. Both directories are ignored by Git.
+Google tests mock the external official verifier boundary. Frontend tests explicitly check new portfolio-password copy, existing-password linking (including compatible legacy passwords), failed-completion state, themes, keyboard/menu/form interactions and wheel/touch boundary guards.
 
-Browser-verification guidance led to stronger loaded-state assertions: screenshots wait for actual dashboard/form data, fonts, paint frames, and the controlled iframe. Representative public, showroom, dashboard, and editor layouts were visually reviewed. A prior screenshot captured too early was replaced; a later interrupted navigation during hot reload was not accepted as a passing run.
+Browser scenarios exercise public and admin views at 320, 375, 390, 430, 768, 1024, 1280 and 1536 px; persistent layout and central-region overflow; theme persistence; mobile navigation; iframe interaction/reduced motion; browser history; signup/login/logout/password change/admin denial; granular CMS and generated-PDF round-trips.
 
-Additional fixes verified include recovery after correcting a broken image URL, UTF-8 password byte limits, and default CTAs for older saved profiles without rewriting stored content.
+## Evidence and isolation
 
-## Dependency remediation
+- playwright-report/index.html: current browser report.
+- artifacts/qa: public, showroom, CMS and theme screenshots.
+- test-results: failed-run screenshots/context/traces, if any.
+- artifacts/tests: isolated PDF/log test outputs.
 
-The audit identified a development-only Vitest mocker advisory. Vitest was upgraded to the patched 4.1.11 release, retaining the supported Vite 6.4.3 line. Both application manifests override nested Vite to their direct version to avoid npm's conflicting optional-peer resolution. No force audit upgrade or global package replacement was used.
+Screenshots of Home and Showroom at mobile widths, the mobile dashboard, and Midnight theme were visually inspected. The iframe fixture and generated resume are explicitly test-only content, not a claim about the actual TypeWriter app or a professional resume.
 
-References: [maintainer advisory](https://github.com/vitest-dev/vitest/security/advisories/GHSA-82fw-gwwq-j7x9), [Vitest 4 migration guide](https://v4.vitest.dev/guide/migration).
+No real .env values were changed or exposed. Tests never connect to the configured portfolio database. No live seed, migration, deployment, message or external account change was performed. Legacy default navigation migration is available through the documented seed procedure; customized navigation needs deliberate owner review.
 
-## Not certified by these checks
+## Remaining deployment acceptance
 
-- The actual TypeWriter service: no real integration URL is configured. Browser tests use an explicitly labelled independent fixture, not a substitute product.
-- Production hosting, actual HTTPS/cookie/CORS topology, database backup/restore, or uptime.
-- Physical mobile devices, Safari/Firefox, and TypeWriter's own responsive implementation.
-- An independent accessibility/security audit, MFA, distributed rate limiting, or SSR/social-crawler behavior.
+- Configure and verify the real Google web client, authorized origins, consent/popup/FedCM and HTTPS cookie topology.
+- Supply and test the actual independent TypeWriter URL and its frame policy.
+- Publish the owner's real resume and content; confirm file persistence/backup/restoration on durable storage.
+- Verify production CSP/proxy/health/monitoring and HTTPS login/logout behavior.
+- Test Safari/Firefox, real mobile touch hardware and native PDF rendering. Local Chromium is not a cross-browser certification.
+- PDF validation is not antivirus; download hiding is not DRM; file logs are not centralized tamper-proof auditing.
 
-Before publishing, enter the real TypeWriter URLs in Showroom, review existing personal content/links, configure deployment security, and perform the actual-origin/device acceptance checklist.
+No production-ready deployment claim is made solely from passing local tests.

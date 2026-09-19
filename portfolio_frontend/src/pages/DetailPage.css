@@ -7,6 +7,6 @@
   object-fit: contain;
   border: 1px solid var(--line);
   border-radius: 0.5rem;
-  background: #edf0ea;
+  background: var(--surface);
   margin: 2rem 0;
 }

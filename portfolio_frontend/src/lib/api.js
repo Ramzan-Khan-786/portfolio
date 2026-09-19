@@ -1,4 +1,5 @@
 const baseUrl = (import.meta.env.VITE_API_URL || '/api').replace(/\/$/, '');
+export const assetUrl = (path) => baseUrl + path;
 export class ApiRequestError extends Error {
   constructor(message, status, details) {
     super(message);
@@ -15,7 +16,7 @@ export async function api(path, options = {}) {
       signal: options.signal || controller.signal,
       credentials: 'include',
       headers: {
-        'Content-Type': 'application/json',
+        ...(options.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
         'X-Portfolio-Request': 'cms',
         ...options.headers,
       },
@@ -45,6 +46,23 @@ export async function api(path, options = {}) {
   }
 }
 export const apiClient = {
+  detachResume: () => api('/admin/resume/file', { method: 'DELETE' }),
+  signup: (values) => api('/auth/signup', { method: 'POST', body: JSON.stringify(values) }),
+  adminLogin: (values) =>
+    api('/auth/admin/login', { method: 'POST', body: JSON.stringify(values) }),
+  googleChallenge: () => api('/auth/google/challenge', { method: 'POST' }),
+  google: (credential) =>
+    api('/auth/google', { method: 'POST', body: JSON.stringify({ credential }) }),
+  completeGoogle: (values) =>
+    api('/auth/google/complete', { method: 'POST', body: JSON.stringify(values) }),
+  put: (resource, values) =>
+    api('/admin/' + resource, { method: 'PUT', body: JSON.stringify(values) }),
+  uploadResume: (file) => {
+    const body = new FormData();
+    body.append('file', file);
+    return api('/admin/resume/file', { method: 'POST', body });
+  },
+  resume: () => api('/public/resume'),
   bootstrap: () => api('/public/bootstrap'),
   project: (slug) => api(`/public/projects/${encodeURIComponent(slug)}`),
   page: (slug) => api(`/public/pages/${encodeURIComponent(slug)}`),

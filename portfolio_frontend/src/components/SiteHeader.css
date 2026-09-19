@@ -1,111 +1,165 @@
 .site-header {
-  position: sticky;
-  z-index: 30;
-  top: 0;
-  border-bottom: 1px solid var(--line);
-  background: #f7f7f4f5;
-  backdrop-filter: blur(12px);
+  position: relative;
+  z-index: 40;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
 }
 .header-inner {
   display: flex;
-  min-height: 72px;
   align-items: center;
-  justify-content: space-between;
-  gap: 1.5rem;
+  gap: 1.8rem;
+  min-height: 76px;
+  padding-inline: 32px;
 }
 .identity {
-  display: inline-flex;
-  min-width: 0;
-  flex-shrink: 0;
-  max-width: 55%;
+  display: flex;
   align-items: center;
-  gap: 0.7rem;
+  gap: 0.75rem;
   text-decoration: none;
-  font-weight: 650;
-  letter-spacing: -0.02em;
-  font-size: 0.93rem;
+  flex-shrink: 0;
+  min-width: 0;
 }
-.identity > span:last-child {
+.identity-mark {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 35px;
+  height: 35px;
+  border: 1px solid var(--border);
+  font:
+    600 0.8rem ui-monospace,
+    monospace;
+  color: var(--text);
+}
+.identity-dot {
+  position: absolute;
+  right: -3px;
+  bottom: -3px;
+  width: 6px;
+  height: 6px;
+  background: var(--accent);
+}
+.identity-name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  max-width: 160px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.identity-mark {
-  display: grid;
-  width: 34px;
-  height: 34px;
-  flex: 0 0 auto;
-  place-items: center;
-  border-radius: 8px;
-  object-fit: cover;
-  background: var(--accent);
-  color: white;
-  font:
-    600 0.7rem ui-monospace,
-    monospace;
-}
 .desktop-nav {
   display: flex;
-  overflow-x: auto;
-  gap: 0.9rem;
+  justify-content: center;
   align-items: center;
+  gap: 1.2rem;
+  flex: 1;
   min-width: 0;
-  scrollbar-width: thin;
 }
-.desktop-nav a,
-.mobile-nav a {
+.desktop-nav a {
   display: flex;
-  min-height: 44px;
   align-items: center;
-  color: #566a5d;
-  font-size: 0.84rem;
+  position: relative;
+  min-height: 44px;
+  font-size: 0.75rem;
+  color: var(--secondary);
   white-space: nowrap;
   text-decoration: none;
-  transition: color 0.18s;
 }
 .desktop-nav a:hover,
-.mobile-nav a:hover,
-.desktop-nav a[aria-current],
-.mobile-nav a[aria-current] {
-  color: #172219;
-}
 .desktop-nav a[aria-current] {
-  text-decoration: underline;
-  text-underline-offset: 8px;
+  color: var(--text);
+}
+.desktop-nav a[aria-current]::after {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--accent);
+}
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-left: auto;
+}
+.account-link {
+  font-size: 0.72rem;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  border-left: 1px solid var(--border);
+  padding-left: 1rem;
+  white-space: nowrap;
 }
 .menu-trigger {
   display: none;
+  place-items: center;
   width: 44px;
   height: 44px;
-  flex-shrink: 0;
-  place-items: center;
-  border: 1px solid var(--line);
-  border-radius: 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
 }
 .mobile-nav {
-  display: none;
+  position: absolute;
+  inset: 100% 0 auto;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 1rem 24px;
+  gap: 0.35rem 1.5rem;
+  max-height: 65dvh;
+  overflow: auto;
 }
-@media (max-width: 900px) {
+.mobile-nav a {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  font-size: 0.9rem;
+  color: var(--secondary);
+}
+.mobile-nav a[aria-current] {
+  color: var(--accent);
+}
+@media (max-width: 1180px) {
+  .identity-name {
+    display: none;
+  }
+  .header-inner {
+    gap: 1.2rem;
+  }
+  .desktop-nav {
+    gap: 1rem;
+  }
+}
+@media (max-width: 930px) {
   .desktop-nav {
     display: none;
+  }
+  .identity-name {
+    display: block;
   }
   .menu-trigger {
     display: grid;
   }
-  .identity {
-    max-width: calc(100% - 60px);
+  .header-inner {
+    min-height: 64px;
+    padding-inline: 20px;
   }
-  .mobile-nav {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.25rem 1rem;
-    padding-block: 0.75rem;
-    border-top: 1px solid var(--line);
-    max-height: 65dvh;
-    overflow-y: auto;
+}
+@media (max-width: 540px) {
+  .identity-name,
+  .account-link {
+    display: none;
   }
-  .mobile-nav a {
-    white-space: normal;
-    overflow-wrap: anywhere;
+  .header-inner {
+    padding-inline: 16px;
+  }
+  .header-controls {
+    gap: 0.7rem;
   }
 }

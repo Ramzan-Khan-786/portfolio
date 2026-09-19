@@ -37,3 +37,15 @@ Avoid changing files during E2E execution; hot reload can abort navigation. Afte
 ## Images do not appear
 
 Use direct public HTTP(S) image URLs, preferably HTTPS. Check host permissions, mixed-content/CSP policy, and the actual response type. Broken images fall back cleanly; after correcting the CMS URL they can load again.
+
+## Google sign-in
+
+If the UI says not configured, set the backend GOOGLE_CLIENT_ID and restart the API. If the official button fails, verify the web-client authorized origin, popup/FedCM/browser privacy settings and static-host CSP/COOP. An expired/replayed challenge requires starting again. Existing email accounts require their current portfolio password before linking, never their Google password. There is no password-reset email flow in V1.
+
+## Resume
+
+Use a trusted unencrypted PDF up to 5 MB and 50 pages; active forms/scripts/attachments are rejected. Check writable durable UPLOAD_DIR and private backups. A database record without its corresponding file produces a safe missing-file response. Uploaded PDF takes priority over external URL; remove the current PDF in CMS to use the external fallback. Browser PDF preview is optional; View resume always offers the original.
+
+## Page navigation and themes
+
+Known legacy anchors route to separate pages. Review customized CMS navigation after upgrading; seed only rewrites the exact old default arrangement. Scroll-to-next-page needs a fresh gesture at a boundary and a short transition lock; it is off for Showroom, reduced motion, and visitor opt-out. Local theme choice wins while enabled; reset to Automatic to follow system/CMS policy.

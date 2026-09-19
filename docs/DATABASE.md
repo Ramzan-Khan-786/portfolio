@@ -1,33 +1,36 @@
-# Database
+# Database and upgrades
 
-MongoDB is accessed through Mongoose; all models have creation/update timestamps.
+MongoDB models use Mongoose timestamps. Unique indexes enforce account and slug/key identity.
 
-| Model          | Content and constraints                                                                                                                                  |
-| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| User           | Unique lowercase email, hidden bcrypt password hash, admin role, sessionVersion                                                                          |
-| Profile        | Logical singleton: identity, headline, introduction, biography, focus areas, images/resume, two configurable CTAs                                        |
-| Skill          | Name, category, description, order, visible                                                                                                              |
-| Project        | Unique slug, title, summary/full text, category, images/screenshots, technologies, external links, status/year, publication/archive/feature flags, order |
-| ShowroomItem   | Label, nullable Project reference, description, presentation/status, embed/full URLs, enabled/order, legacy default flag                                 |
-| NavigationItem | Label, destination type/URL, order/enabled, desktop/mobile visibility                                                                                    |
-| SocialLink     | Label, platform kind, safe URL, order/enabled                                                                                                            |
-| Setting        | Unique key and value; API accepts bounded text                                                                                                           |
-| Page           | Unique slug, title, summary, plain-text body, published/order                                                                                            |
+| Model          | Purpose                                                                                                                                 |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| User           | Unique normalized email, hidden passwordHash, user/admin role, sessionVersion, disabled, optional sparse-unique googleId, emailVerified |
+| Profile        | Shared identity/biography/focus/default CTAs and legacy resume URL                                                                      |
+| ContentSection | Unique allowed section key and server-validated structured data                                                                         |
+| Skill          | Category, description/icon URL, order/visibility                                                                                        |
+| Project        | Unique slug, descriptions/images/technologies/links/status/year and publication controls                                                |
+| ShowroomItem   | Independent presentation, optional Project relation, URLs/tech/fallback/default/order                                                   |
+| NavigationItem | Label/destination/type, order/enabled and viewport visibility                                                                           |
+| SocialLink     | Platform label/kind/URL/order/enabled                                                                                                   |
+| Setting        | Unique key/value; public keys explicitly allowlisted                                                                                    |
+| Page           | Unique nonreserved slug and published plain-text content                                                                                |
+| Resume         | Unique primary key, editable metadata/links, hidden current UUID filename and byte size                                                 |
+| AuthAttempt    | Unique hashed random proof, purpose/server-owned data, expiry with MongoDB TTL index                                                    |
 
-Project has an index on published/archived/order; showroom has enabled/order. Unique email, project/page slug, and setting key enforce identity constraints. Profile is maintained as one record by the application; there is no database-enforced singleton key.
+Profile remains a logical singleton for compatibility. Resume and ContentSection enforce keyed uniqueness. AuthAttempt expiry is checked at request time, not just eventually by TTL cleanup, and accepted proofs are consumed atomically. Google tokens themselves are never stored.
 
 ## Visibility and relationships
 
-Only published, nonarchived projects are public. The status label is editorial metadata; the separate Archived / hidden toggle controls visibility. Skills require visible, social/navigation/showroom records require enabled. A showroom item is independently public even when its project is unpublished, but that project's private fields are not populated. Disable the showroom entry too if the whole experience should be hidden.
+Public projects require published and not archived; skills require visible; social/navigation/showroom entries require enabled. Section visibility controls page presentation. Shared section information may also be reused by Resume; do not treat section visibility as a secrecy mechanism.
 
-defaultShowroomId is an internal setting pointing to the selected enabled item. It is excluded from the general Settings UI and public bootstrap. If unavailable, the first enabled item in order is selected; older isDefault flags are honored only before an authoritative setting exists. Responses normalize isDefault to exactly one effective enabled default.
+A showroom entry may remain public independently of its project, but an unpublished project's private fields are never populated. defaultShowroomId is an internal Setting controlling the effective enabled default; fallback is first enabled in deterministic order. Legacy sandbox becomes iframe, never a local fake app.
 
-Order is ascending numeric order, then ID for deterministic ties. Unique slugs are generated from project titles if omitted. Slug edits change URLs; V1 has no automatic old-slug redirect history.
+## Non-destructive upgrade
 
-## Seed and upgrades
+Existing saved admins have role=admin and retain their hash/session version. New users default to user, and all signup paths explicitly set user. Seed creates only absent admins and refuses to elevate existing normal users.
 
-The seed uses setOnInsert. Existing CMS values and user passwords are preserved. Rerunning can restore deleted initial records, so it is not a recurring content sync job. New records include a starter profile, skills, one TypeWriter project, two showroom entries, routes, and basic settings. Social links/contact address are not invented.
+Existing content receives compatible defaults; no real MongoDB mutation is performed by tests. Seed uses setOnInsert. The one targeted compatibility upgrade recognizes the exact unchanged legacy six-item navigation, moves Profile from / to /profile, adjusts the old default order and inserts Home/Resume. Customized records are preserved. Review customized navigation manually after upgrading. Seeding can recreate deleted defaults, so run deliberately after a backup.
 
-Legacy sandbox showroom types are read as iframe. There is no local TypeWriter replacement. Old homepage anchors remain valid where a section exists; change the Showroom navigation destination to /showroom to reach the full experience. Reauthenticate after the token format/security upgrade.
+Resume uploads are filesystem bytes plus MongoDB metadata: back up both together. Replaced/detached PDFs remain private and cannot be fetched by arbitrary filename. Prune old versions only with an explicit operator retention procedure, not broad directory deletion.
 
-Take a database backup before upgrades. No migration or live seed was executed by automated tests: test suites create and drop isolated temporary databases. Production backup schedules, access controls, and restoration drills remain deployment responsibilities.
+Unique email/googleId indexes must be created successfully before enabling public registration. Resolve any pre-existing duplicate data through an approved maintenance procedure, not silent automatic deletion. Slug changes do not create redirects.

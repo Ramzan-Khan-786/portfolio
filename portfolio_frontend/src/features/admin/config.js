@@ -3,15 +3,24 @@ const order = field('order', 'Display order', 'number', { min: 0, max: 100000 })
 const visible = field('enabled', 'Enabled', 'checkbox');
 export const sections = [
   ['dashboard', 'Dashboard'],
-  ['profile', 'Profile & About'],
+  ['hero', 'Hero'],
+  ['identity', 'Identity'],
+  ['profile', 'Profile details'],
+  ['about', 'About'],
   ['skills', 'Skills'],
   ['projects', 'Projects'],
   ['showroom', 'Showroom'],
+  ['resume', 'Resume'],
+  ['contact', 'Contact'],
   ['navigation', 'Navigation'],
   ['pages', 'Pages'],
   ['socials', 'Social links'],
+  ['footer', 'Footer'],
+  ['appearance', 'Themes'],
   ['settings', 'Site settings'],
   ['account', 'Account'],
+  ['users', 'Users'],
+  ['system', 'Operations'],
 ];
 export const profileFields = [
   field('name', 'Name', 'text', { required: true, maxLength: 80 }),
@@ -43,6 +52,7 @@ export const resources = {
     fields: [
       field('name', 'Skill name', 'text', { required: true }),
       field('category', 'Category', 'text', { required: true }),
+      field('iconUrl', 'Icon URL', 'url'),
       field('description', 'Description', 'textarea', { maxLength: 280 }),
       order,
       field('visible', 'Visible on portfolio', 'checkbox'),
@@ -107,6 +117,9 @@ export const resources = {
         help: 'Independent app URL that allows embedding. Leave blank while deployment is in preparation.',
       }),
       field('externalUrl', 'Full project URL', 'url'),
+      field('githubUrl', 'GitHub URL override', 'url'),
+      field('technologies', 'Technology overrides', 'array'),
+      field('fallbackMessage', 'Unavailable message', 'textarea', { maxLength: 500 }),
       field('status', 'Availability', 'select', { options: ['live', 'coming-soon'] }),
       order,
       visible,
@@ -203,13 +216,15 @@ export function toForm(record, fields) {
       const value = record?.[name];
       return [
         name,
-        type === 'checkbox'
-          ? Boolean(value)
-          : type === 'array' || type === 'lines'
-            ? (value || []).join(type === 'lines' ? '\n' : ', ')
-            : type === 'project'
-              ? value?._id || value || ''
-              : (value ?? ''),
+        type === 'repeater' || type === 'choices'
+          ? value || []
+          : type === 'checkbox'
+            ? Boolean(value)
+            : type === 'array' || type === 'lines'
+              ? (value || []).join(type === 'lines' ? '\n' : ', ')
+              : type === 'project'
+                ? value?._id || value || ''
+                : (value ?? ''),
       ];
     }),
   );

@@ -1,0 +1,99 @@
+:root,
+[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #151719;
+  --surface: #1c1f22;
+  --raised: #24282c;
+  --text: #eeefec;
+  --secondary: #b4babd;
+  --muted: #8e979c;
+  --border: #343a3e;
+  --accent: #c4db9b;
+  --accent-hover: #d5e9b4;
+  --on-accent: #1c2514;
+  --accent-soft: #273024;
+  --code: #101214;
+  --danger: #ffb1a6;
+  --danger-bg: #351f21;
+  --shadow: 0 16px 48px #0004;
+}
+[data-theme='light'] {
+  color-scheme: light;
+  --bg: #f7f7f2;
+  --surface: #fff;
+  --raised: #eeeee7;
+  --text: #202725;
+  --secondary: #53625b;
+  --muted: #647069;
+  --border: #d7dcd4;
+  --accent: #30563e;
+  --accent-hover: #254631;
+  --on-accent: #fff;
+  --accent-soft: #e4ecdf;
+  --code: #edf0e9;
+  --danger: #a52d30;
+  --danger-bg: #fff0ed;
+  --shadow: 0 16px 48px #24352a12;
+}
+[data-theme='midnight'] {
+  color-scheme: dark;
+  --bg: #0f1828;
+  --surface: #172237;
+  --raised: #1e2d44;
+  --text: #edf2fa;
+  --secondary: #b5c3d8;
+  --muted: #96abc5;
+  --border: #30425d;
+  --accent: #93baf6;
+  --accent-hover: #b2ceff;
+  --on-accent: #101f37;
+  --accent-soft: #213650;
+  --code: #0b1220;
+  --danger: #ffb7b0;
+  --danger-bg: #382a3a;
+  --shadow: 0 16px 48px #020a1955;
+}
+[data-theme='graphite'] {
+  color-scheme: dark;
+  --bg: #242424;
+  --surface: #2d2d2d;
+  --raised: #373737;
+  --text: #f1f0ed;
+  --secondary: #c1bfb9;
+  --muted: #a9a69f;
+  --border: #494846;
+  --accent: #e0d4bc;
+  --accent-hover: #f1e6cd;
+  --on-accent: #28241c;
+  --accent-soft: #3c3930;
+  --code: #1c1c1c;
+  --danger: #ffc1b6;
+  --danger-bg: #462e29;
+  --shadow: 0 16px 48px #0003;
+}
+[data-theme='terminal'] {
+  color-scheme: dark;
+  --bg: #14211c;
+  --surface: #1c2c24;
+  --raised: #25392e;
+  --text: #e9f0e4;
+  --secondary: #b5c7b8;
+  --muted: #92ad9c;
+  --border: #395242;
+  --accent: #b4cf98;
+  --accent-hover: #d1e3b9;
+  --on-accent: #192718;
+  --accent-soft: #2b4027;
+  --code: #0e1914;
+  --danger: #ffc4a5;
+  --danger-bg: #3d3024;
+  --shadow: 0 16px 48px #04120a44;
+}
+:root {
+  --ink: var(--text);
+  --paper: var(--bg);
+  --line: var(--border);
+  --radius: 6px;
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --page-duration: 340ms;
+}
