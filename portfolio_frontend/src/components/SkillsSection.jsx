@@ -31,7 +31,7 @@ export default function SkillsSection() {
               <ul>
                 {skills.map((skill) => (
                   <li key={skill._id}>
-                    <ContentImage src={skill.iconUrl} alt="" className="skill-icon" />
+                    <ContentImage src={skill.iconMedia?.url || skill.iconUrl} alt={skill.iconMedia?.altText || ""} className="skill-icon" loading="lazy" />
                     <div>
                       <h3>{skill.name}</h3>
                       {skill.description && <p>{skill.description}</p>}

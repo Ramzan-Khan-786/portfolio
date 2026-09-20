@@ -21,9 +21,13 @@ export const contentModules = {
       visibility,
       f('eyebrow', 'Technical label'),
       f('greeting', 'Greeting'),
+      f('name', 'Developer name override'),
       f('headline', 'Headline', 'textarea'),
       f('introduction', 'Introduction', 'textarea'),
-      f('imageUrl', 'Hero image override', 'url'),
+      f('imageMedia', 'Hero image', 'media', { category: 'hero' }),
+      f('imagePosition', 'Image position', 'select', { options: ['center', 'top', 'bottom', 'left', 'right'] }),
+      f('imageVisible', 'Show hero image', 'checkbox'),
+      f('imageUrl', 'Legacy hero image URL', 'url'),
       f('actions', 'Actions', 'repeater', {
         fields: links,
         max: 3,
@@ -56,6 +60,7 @@ export const contentModules = {
       subtitle,
       f('heading', 'Narrative heading'),
       f('body', 'Biography', 'textarea', { maxLength: 8000 }),
+      f('imageMedia', 'About image', 'media', { category: 'about' }),
       f('principles', 'Working principles', 'lines'),
       f('experience', 'Experience', 'repeater', { fields: timeline, max: 30 }),
     ],
@@ -89,21 +94,6 @@ export const contentModules = {
       f('links', 'Useful links', 'repeater', { fields: links, max: 4 }),
     ],
   },
-  appearance: {
-    title: 'Themes',
-    description:
-      'Enable the palettes available to visitors and choose the first-visit default. Returning visitors keep their choice.',
-    fields: [
-      f('defaultTheme', 'Default theme', 'select', {
-        options: ['dark', 'light', 'midnight', 'graphite', 'terminal'],
-      }),
-      f('followSystem', 'Follow system preference on first visit', 'checkbox'),
-      f('enabledThemes', 'Available themes', 'choices', {
-        options: ['dark', 'light', 'midnight', 'graphite', 'terminal'],
-        help: 'Terminal is displayed to visitors as Fieldwork. Keep the default theme enabled.',
-      }),
-    ],
-  },
 };
 export const resumeFields = [
   title,
@@ -112,7 +102,7 @@ export const resumeFields = [
   f('downloadEnabled', 'Show download action', 'checkbox'),
   f('lastUpdated', 'Last updated', 'date'),
   f('externalUrl', 'External PDF URL', 'url', {
-    help: 'Used when no file has been uploaded. Uploaded files take precedence.',
+    help: 'Used when no version is published. Archiving the current PDF may reactivate this fallback.',
   }),
   f('links', 'Resume / coding profile links', 'repeater', { fields: links, max: 12 }),
 ];

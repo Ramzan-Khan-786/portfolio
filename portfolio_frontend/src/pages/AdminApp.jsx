@@ -5,6 +5,8 @@ import { useAuth } from '../context/AuthContext.jsx';
 import ThemeSelector from '../components/ThemeSelector.jsx';
 import ContentEditor from '../features/admin/ContentEditor.jsx';
 import ResumeEditor from '../features/admin/ResumeEditor.jsx';
+import MediaLibrary from '../features/media/MediaLibrary.jsx';
+import ThemeEditor from '../features/admin/ThemeEditor.jsx';
 import UsersPanel from '../features/admin/UsersPanel.jsx';
 import Operations from '../features/admin/Operations.jsx';
 import { contentModules } from '../features/admin/sectionConfig.js';
@@ -104,7 +106,7 @@ function Workspace({ user, logout }) {
           </button>
         </div>
         <div className="cms-theme">
-          <ThemeSelector />
+          <ThemeSelector variant="admin" />
         </div>
         <nav className="my-8 grid gap-1" aria-label="CMS navigation">
           {sections.map(([key, label]) => (
@@ -160,6 +162,10 @@ function Workspace({ user, logout }) {
             <ProfileEditor notify={notify} />
           ) : section === 'account' ? (
             <Account notify={notify} />
+          ) : section === 'media' ? (
+            <MediaLibrary notify={notify} />
+          ) : section === 'appearance' ? (
+            <ThemeEditor notify={notify} />
           ) : contentModules[section] ? (
             <ContentEditor
               key={section}

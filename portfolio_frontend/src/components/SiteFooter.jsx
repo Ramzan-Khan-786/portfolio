@@ -33,7 +33,7 @@ export default function SiteFooter({
           .slice(0, 2)
           .map((link) => (
             <ContentLink key={link.url} to={link.url}>
-              {link.label}
+              {link.label} ↗
             </ContentLink>
           ))}
       </nav>

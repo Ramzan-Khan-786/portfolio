@@ -1,22 +1,37 @@
 # Portfolio V1 verification report
 
+## Current release 1.3.0 — NOT TESTED
+
+Cloudinary media, versioned resumes/Drive/PDF.js, daisyUI policies and smoother route gestures are implemented with source-only review. The follow-up theme-control redesign and random-on-reload/visit-only override behavior are also source-reviewed only; no executable checks were performed. Per the implementation brief, no tests, lint, builds, servers, browser automation, live database changes or provider test uploads were run for this release. Dependencies were installed with package scripts disabled; that is not runtime verification.
+
+No actual .env values were inspected or changed. No automatic asset/content migration or deletion was performed. Cloudinary credentials, optional Drive setup and all runtime/manual acceptance remain owner tasks. Follow [MANUAL_TESTING_GUIDE](testing/MANUAL_TESTING_GUIDE.md). Existing automated fixtures also need adaptation to the new contracts before their results can certify this release.
+
+The saved browser report and all pass counts below are **historical v1.2.0 evidence only**, preserved without rerunning. They do not verify v1.3.0 or establish production readiness.
+
+## Historical release 1.2.0 evidence
+
 Date: 2026-09-19. Release: 1.2.0. Local Windows / Node 22 / Chromium acceptance, using isolated MongoDB. This report distinguishes automated implementation checks from deployment acceptance.
 
-## Current verified checks
+## Historical verified checks (1.2.0 only)
 
-| Check | Result |
-| --- | --- |
-| Backend schema/API/database tests | 36 passed |
-| Frontend component/interaction tests | 20 passed |
-| ESLint | Passed |
-| Production Vite build | Passed; main entry approximately 223 KB / 72 KB gzip, with lazy route chunks |
-| Prettier | Passed |
-| Local documentation links | All resolve |
-| git diff --check | Passed |
-| Root/frontend/backend dependency audits | Zero reported vulnerabilities |
-| Final browser regression | In progress: 23 independently timed viewport/flow checks |
+| Check                                               | Result                                                                                              |
+| --------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Backend schema/API/database tests                   | 36 passed                                                                                           |
+| Frontend component/interaction tests                | 20 passed                                                                                           |
+| ESLint                                              | Passed                                                                                              |
+| Production Vite build                               | Passed; main entry approximately 223 KB / 72 KB gzip, with lazy route chunks                        |
+| Prettier                                            | Passed                                                                                              |
+| Local documentation links                           | All resolve                                                                                         |
+| git diff --check                                    | Passed                                                                                              |
+| Root/frontend/backend dependency audits             | Zero reported vulnerabilities                                                                       |
+| Full browser regression                             | 23 passed; zero failed, flaky or skipped                                                            |
+| Follow-up browser checks after heading/footer edits | 5 passed: 320/390/1536 px public layouts, wheel/history and reduced-motion/short-landscape showroom |
 
-The earlier browser pass verified public routes at all eight widths, CMS/database/public round-trips, themes, boundary/history guards, account lifecycle, and resume publication. It exposed a short-landscape showroom sizing issue and an oversized single admin-test timeout. The layout was compacted and responsive sweeps split by viewport; final regression is being rerun.
+The full browser regression verified public and admin routes at all eight widths, CMS/database/public round-trips, themes, boundary/history guards, account lifecycle, and resume publication. The short-landscape showroom sizing issue was fixed, and responsive sweeps were split by viewport to avoid an oversized single-test timeout. The saved HTML report confirms all 23 checks passed.
+
+Later local heading/footer edits were preserved and checked with five focused browser scenarios. The unused heading prop and PDF-validation catch binding were removed without changing runtime behavior. A separate browser session confirmed Home renders without page errors; its screenshot was visually inspected. The full HTML report was preserved while follow-up results were written separately.
+
+The first follow-up component run timed out while starting a thread worker. Rerunning with `npm.cmd --prefix portfolio_frontend test -- --pool=forks --maxWorkers=1 --no-file-parallelism` completed all 20 tests without errors. This was a runner-startup issue, not a skipped test.
 
 ## Scope
 
@@ -28,7 +43,9 @@ Browser scenarios exercise public and admin views at 320, 375, 390, 430, 768, 10
 
 ## Evidence and isolation
 
-- playwright-report/index.html: current browser report.
+- playwright-report/index.html: historical saved browser report.
+- artifacts/qa/latest-ui-tests/.last-run.json: follow-up browser result after local UI edits.
+- artifacts/qa/latest-home.png: manually inspected follow-up Home screenshot.
 - artifacts/qa: public, showroom, CMS and theme screenshots.
 - test-results: failed-run screenshots/context/traces, if any.
 - artifacts/tests: isolated PDF/log test outputs.

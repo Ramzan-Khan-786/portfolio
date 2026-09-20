@@ -38,7 +38,7 @@ export default function PortfolioHome() {
         <div className="home-intro">
           <p className="home-greeting">{hero.greeting || 'Hello, I’m'}</p>
           <h1>
-            {profile.name}
+            {hero.name || profile.name}
             <span className="name-period">.</span>
           </h1>
           <h2>{hero.headline || profile.headline}</h2>
@@ -59,14 +59,15 @@ export default function PortfolioHome() {
           </div>
         </div>
         <aside className="home-aside">
-          <div className="home-portrait">
+          {hero.imageVisible !== false && <div className="home-portrait">
             <ContentImage
-              src={hero.imageUrl || profile.profileImage}
-              alt={profile.name}
+              src={hero.imageMedia?.url || hero.imageUrl || profile.profileMedia?.url || profile.profileImage}
+              alt={hero.imageMedia?.altText || profile.profileMedia?.altText || profile.name}
+              style={{ objectPosition: hero.imagePosition || 'center' }}
               initials={profile.initials || 'RK'}
             />
             <span className="portrait-caption">{profile.location || 'Engineering portfolio'}</span>
-          </div>
+          </div>}
           <div className="home-focus">
             <p className="eyebrow">Current focus</p>
             {profile.focusAreas?.map((area) => (

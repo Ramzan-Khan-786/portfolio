@@ -36,7 +36,7 @@ Avoid changing files during E2E execution; hot reload can abort navigation. Afte
 
 ## Images do not appear
 
-Use direct public HTTP(S) image URLs, preferably HTTPS. Check host permissions, mixed-content/CSP policy, and the actual response type. Broken images fall back cleanly; after correcting the CMS URL they can load again.
+For managed images, check Cloudinary configuration, ready asset state and whether the owning content form was saved after upload. Legacy image fields need direct public HTTP(S) URLs, preferably HTTPS. Check host permissions, mixed-content/CSP policy, and the actual response type. Broken images fall back cleanly; after correcting the CMS URL they can load again.
 
 ## Google sign-in
 
@@ -44,8 +44,22 @@ If the UI says not configured, set the backend GOOGLE_CLIENT_ID and restart the 
 
 ## Resume
 
-Use a trusted unencrypted PDF up to 5 MB and 50 pages; active forms/scripts/attachments are rejected. Check writable durable UPLOAD_DIR and private backups. A database record without its corresponding file produces a safe missing-file response. Uploaded PDF takes priority over external URL; remove the current PDF in CMS to use the external fallback. Browser PDF preview is optional; View resume always offers the original.
+Use a trusted unencrypted PDF up to 5 MB and 50 pages; active forms/scripts/attachments are rejected. Check backend Cloudinary configuration, draft creation and preview acknowledgement before publishing. A successful upload does not change the public version. Identical bytes are rejected: restore the existing version instead. UPLOAD_DIR is read-only legacy compatibility, not the new upload destination.
+
+If PDF.js cannot render, check the matching emitted worker and /pdfjs-assets CMaps/fonts/WASM, proxy PDF response type and static-host CSP; an HTML SPA fallback is not a PDF/asset. External legacy PDFs may reject cross-origin fetch; use Open PDF as the fallback. Missing/pending preview acknowledgement can be retried after the viewer renders.
+
+Drive import needs Picker/Drive APIs, a correctly restricted public API key, project number, OAuth web client and exact authorized origin. Consent may be cancelled/expired. Retry selecting the PDF or download it from Drive and upload locally. Do not paste access tokens into logs or environment files.
 
 ## Page navigation and themes
 
-Known legacy anchors route to separate pages. Review customized CMS navigation after upgrading; seed only rewrites the exact old default arrangement. Scroll-to-next-page needs a fresh gesture at a boundary and a short transition lock; it is off for Showroom, reduced motion, and visitor opt-out. Local theme choice wins while enabled; reset to Automatic to follow system/CMS policy.
+Known legacy anchors route to separate pages. Review customized CMS navigation after upgrading; seed only rewrites the exact old default arrangement. Scroll-to-next-page needs gentle movement at a true boundary and observes a short transition/momentum lock; it is off for reduced motion and visitor opt-out. On Showroom, scroll over the heading/caption/outer chrome; cross-origin iframe input cannot bubble to the portfolio. No additional Showroom scrolling area is intended.
+
+A permitted manual theme choice lasts only until reload. Choose the automatic option to return to the current visit's assignment. Random on every reload stays stable through navigation/focus/policy refresh, then draws again on full reload. With at least two enabled palettes and sessionStorage available, it avoids the last displayed theme. Daily mode follows UTC; fixed mode stays fixed. If every reload is still fixed, explicitly select Random on every reload in Admin → Themes and save. Old per-device policies normalize automatically, but saved fixed/daily policies are intentionally preserved. Policy refresh can take up to a minute or a window-focus event. See [theme system](theme-system.md).
+
+## Cloudinary operations / 409 conflicts
+
+Missing configuration disables new uploads; do not add Cloudinary secrets to VITE variables. Unsupported types, disguised files, oversized images and SVG are rejected. Transparent PNG/WebP is the fallback when background removal is disabled or unavailable. An uploaded-but-unsaved selection is an unused library asset, not a saved content change.
+
+Another CMS mutation may hold the shared database lease. Wait for that operation and retry; do not force-release a live upload lock. Failed deletion keeps retryable metadata, and referenced assets cannot be deleted until their usages are removed. Never manually destroy referenced provider assets to bypass this protection. See [Cloudinary guide](cloudinary-media-management.md).
+
+The current v1.3.0 implementation has not been executed for verification. Troubleshooting steps above are manual operator guidance, not observed successful outcomes.

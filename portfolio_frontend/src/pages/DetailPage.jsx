@@ -71,7 +71,7 @@ export default function DetailPage({ type = 'project' }) {
       {type === 'project' && (
         <>
           <span className="status">{item.status?.replace('-', ' ')}</span>
-          <ContentImage src={item.imageUrl} alt={item.title + ' cover'} className="detail-cover" />
+          <ContentImage src={item.coverMedia?.url || item.thumbnailMedia?.url || item.imageUrl} alt={item.coverMedia?.altText || item.title + ' cover'} className="detail-cover" />
           <div className="my-6 flex flex-wrap gap-2">
             {item.technologies?.map((tech) => (
               <span
@@ -98,6 +98,7 @@ export default function DetailPage({ type = 'project' }) {
             </ContentLink>
           </div>
           <div className="grid gap-6 sm:grid-cols-2">
+            {item.gallery?.map((entry, index) => <figure key={entry.mediaId + '-' + index}><ContentImage src={entry.url} alt={entry.altText || item.title + ' image ' + (index + 1)} loading="lazy" className="w-full rounded-md border border-line" />{entry.caption && <figcaption className="text-xs text-muted mt-2">{entry.caption}</figcaption>}</figure>)}
             {item.screenshots?.map((url, index) => (
               <ContentImage
                 key={url}

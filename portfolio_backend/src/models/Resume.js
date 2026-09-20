@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 const schema = new mongoose.Schema(
   {
     key: { type: String, default: 'primary', unique: true },
+    currentVersion: { type: mongoose.Schema.Types.ObjectId, ref: 'ResumeVersion', default: null },
     title: { type: String, default: 'Resume' },
     description: { type: String, default: '' },
     visible: { type: Boolean, default: true },

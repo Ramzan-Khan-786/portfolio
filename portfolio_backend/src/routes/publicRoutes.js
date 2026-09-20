@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { getThemes } from '../controllers/themeController.js';
 import { getResume, serveResume } from '../controllers/resumeController.js';
 import {
   bootstrap,
@@ -9,6 +10,7 @@ import {
 } from '../controllers/contentController.js';
 
 const router = Router();
+router.get('/themes', getThemes);
 router.get('/resume', getResume);
 router.get('/resume/file', serveResume);
 router.get('/bootstrap', bootstrap);

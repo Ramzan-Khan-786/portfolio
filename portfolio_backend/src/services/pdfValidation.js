@@ -1,10 +1,4 @@
-import {
-  PDFDocument,
-  PDFDict,
-  PDFArray,
-  PDFName,
-  PDFRef,
-} from 'pdf-lib';
+import { PDFDocument, PDFDict, PDFArray, PDFName, PDFRef } from 'pdf-lib';
 
 import { ApiError } from '../utils/ApiError.js';
 
@@ -20,21 +14,13 @@ const forbiddenKeys = new Set([
   'AcroForm',
   'XFA',
   'RichMediaContent',
+  'RichMedia',
+  'Collection',
 ]);
 
-const dangerousActions = new Set([
-  'JavaScript',
-  'Launch',
-  'SubmitForm',
-  'ImportData',
-  'GoToR',
-]);
+const dangerousActions = new Set(['JavaScript', 'Launch', 'SubmitForm', 'ImportData', 'GoToR']);
 
-const allowedActions = new Set([
-  'GoTo',
-  'URI',
-  'Named',
-]);
+const allowedActions = new Set(['GoTo', 'URI', 'Named']);
 
 function getPdfName(value) {
   if (value instanceof PDFName) {
@@ -99,6 +85,9 @@ function inspectPdfObject(object, state) {
 }
 
 function inspectPdfDictionary(dict, state) {
+  if (getPdfName(state.context.lookup(getDictionaryValue(dict, 'Type'))) === 'Action') {
+    inspectOpenAction(dict, state);
+  }
   for (const [key, value] of dict.entries()) {
     const keyName = key.decodeText();
 
@@ -106,12 +95,13 @@ function inspectPdfDictionary(dict, state) {
       throw new Error(`Forbidden PDF feature: ${keyName}`);
     }
 
-    if (keyName === 'OpenAction') {
+    if (keyName === 'OpenAction' || keyName === 'A') {
       inspectOpenAction(value, state);
     }
-
+    // /S also names ordinary structure roles and border styles; do not reject tagged PDFs.
     if (keyName === 'S') {
-      inspectActionType(value);
+      const resolved = state.context.lookup(value);
+      if (dangerousActions.has(getPdfName(resolved))) throw new Error('Dangerous PDF action');
     }
 
     inspectPdfObject(value, state);
@@ -119,12 +109,15 @@ function inspectPdfDictionary(dict, state) {
 }
 
 function inspectOpenAction(value, state) {
+  value = state.context.lookup(value);
   if (!(value instanceof PDFDict)) {
     inspectPdfObject(value, state);
     return;
   }
 
-  const actionType = getDictionaryValue(value, 'S');
+  if (state.seenActions.has(value)) return;
+  state.seenActions.add(value);
+  const actionType = state.context.lookup(getDictionaryValue(value, 'S'));
 
   if (!actionType) {
     return;
@@ -144,23 +137,15 @@ function inspectOpenAction(value, state) {
     throw new Error(`Unsupported OpenAction: ${actionName}`);
   }
 
+  if (actionName === 'URI') {
+    const uri = state.context.lookup(getDictionaryValue(value, 'URI'));
+    const text = typeof uri?.decodeText === 'function' ? uri.decodeText() : '';
+    if (!/^(https?:\/\/|mailto:)/i.test(text) || /[\r\n]/.test(text)) throw new Error('Unsafe PDF link');
+  }
+  const next = state.context.lookup(getDictionaryValue(value, 'Next'));
+  if (next instanceof PDFArray) for (const action of next.asArray()) inspectOpenAction(action, state);
+  else if (next) inspectOpenAction(next, state);
   inspectPdfObject(value, state);
-}
-
-function inspectActionType(value) {
-  const actionName = getPdfName(value);
-
-  if (!actionName) {
-    return;
-  }
-
-  if (dangerousActions.has(actionName)) {
-    throw new Error(`Dangerous PDF action: ${actionName}`);
-  }
-
-  if (!allowedActions.has(actionName)) {
-    throw new Error(`Unsupported PDF action: ${actionName}`);
-  }
 }
 
 export async function validateResumePdf(buffer) {
@@ -184,6 +169,7 @@ export async function validateResumePdf(buffer) {
       context: document.context,
       seenObjects: new Set(),
       seenRefs: new Set(),
+      seenActions: new Set(),
       count: 0,
     };
 
@@ -195,7 +181,7 @@ export async function validateResumePdf(buffer) {
       valid: true,
       pageCount,
     };
-  } catch (error) {
+  } catch {
     throw new ApiError(
       422,
       'Use a readable, unencrypted PDF (1–50 pages) without scripts, forms, or attachments.',

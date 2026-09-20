@@ -72,9 +72,9 @@ export default function WorkSection() {
                   </ContentLink>
                 </div>
               </div>
-              {project.imageUrl && (
+              {(project.thumbnailMedia?.url || project.coverMedia?.url || project.imageUrl) && (
                 <ContentImage
-                  src={project.imageUrl}
+                  src={project.thumbnailMedia?.url || project.coverMedia?.url || project.imageUrl}
                   loading="lazy"
                   alt={project.title + ' preview'}
                   className="work-preview"

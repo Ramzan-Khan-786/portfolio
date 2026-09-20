@@ -1,7 +1,7 @@
 import { ArrowUpRight, Mail } from 'lucide-react';
 import { usePortfolio } from '../context/PortfolioContext.jsx';
 import { settingValue } from '../lib/content.js';
-import { ContentLink, StatePanel } from './Ui.jsx';
+import { ContentImage, ContentLink, StatePanel } from './Ui.jsx';
 import PageHeading from './PageHeading.jsx';
 import { Timeline } from '../pages/ProfilePage.jsx';
 import './AboutContact.css';
@@ -16,6 +16,21 @@ export function AboutSection() {
       </PageHeading>
       <div className="about-composition">
         <aside>
+          {about.imageMedia?.url && (
+            <figure className="mb-6">
+              <ContentImage
+                src={about.imageMedia.url}
+                alt={about.imageMedia.altText || 'About the developer'}
+                loading="lazy"
+                className="w-full rounded border border-line"
+              />
+              {about.imageMedia.caption && (
+                <figcaption className="text-xs text-muted mt-2">
+                  {about.imageMedia.caption}
+                </figcaption>
+              )}
+            </figure>
+          )}
           <p className="eyebrow">In my own words</p>
           <h2>{about.heading || 'A little more context.'}</h2>
           {content.profile?.focusAreas?.length > 0 && (

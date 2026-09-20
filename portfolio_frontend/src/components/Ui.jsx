@@ -2,6 +2,7 @@ import { Component, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { safeUrl } from '../lib/content.js';
 import './Ui.css';
+import { optimizedImage } from '../lib/media.js';
 
 export function ContentLink({ to, children, ...props }) {
   const href = safeUrl(to, { internal: true, email: true });
@@ -26,7 +27,7 @@ export function ContentLink({ to, children, ...props }) {
 export function ContentImage({ src, alt, className = '', initials = '', ...props }) {
   const [failedSrc, setFailedSrc] = useState(null);
   return safeUrl(src) && failedSrc !== src ? (
-    <img src={src} alt={alt} className={className} onError={() => setFailedSrc(src)} {...props} />
+    <img src={optimizedImage(src)} alt={alt} className={className} decoding="async" onError={() => setFailedSrc(src)} {...props} />
   ) : initials ? (
     <span className={className} aria-label={alt}>
       {initials}

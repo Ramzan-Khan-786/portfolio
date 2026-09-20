@@ -29,16 +29,25 @@ References: [Google server verification](https://developers.google.com/identity/
 
 - Explicit credentialed CORS origins; every mutation requires X-Portfolio-Request: cms. Untrusted Origin and cross-site requests without Origin are rejected.
 - Login/admin login/signup: 15 requests per 15 minutes/IP; password: 10; Google namespace: 40, completion additionally 15; admin namespace: 500.
+- Media/resume POST operations have a further per-admin limit of 80/hour; the database CMS mutation lease prevents simultaneous content saves and referenced-asset deletion.
 - Auth/admin responses are no-store. URLs reject unsafe schemes, credentials and protocol-relative destinations. Page slugs cannot override system routes.
 - Public APIs filter drafts/private settings. Showroom references never expose unpublished project details.
 - Central errors use predictable status/envelopes without production stack traces. Logs whitelist only safe event metadata.
 
 ## Resume safety
 
-Administrator-only multipart upload requires PDF extension/MIME/header and successful parsing, 1–50 pages, and at most 5 MB. Recursive object inspection rejects scripts, actions, forms and embedded attachments. UUID filenames are generated server-side; no client-controlled storage paths are accepted. Public access serves only the current published file with PDF MIME, no-store, nosniff, controlled disposition and restricted frame policy.
+Administrator-only multipart upload requires PDF extension/MIME/header and successful parsing, 1–50 pages, and at most 5 MB. Recursive object inspection rejects scripts, unsafe actions, forms and embedded attachments while retaining internal destinations and HTTP(S)/mailto links. Cloudinary folders/public IDs are generated server-side; no client-controlled storage paths or arbitrary import URLs are accepted. Public access serves only the current published file with PDF MIME, no-store, nosniff, controlled disposition and restricted frame policy.
 
-Validation is not antivirus. Only upload trusted documents; add malware scanning if accepting uploads from less-trusted roles in the future. A viewable PDF can always be saved by the visitor: disabling the download action is not DRM. Removing/replacing a PDF keeps old bytes private for operator recovery.
+Validation is not antivirus. Only upload trusted documents; add malware scanning if accepting uploads from less-trusted roles in the future. A viewable PDF can always be saved by the visitor: disabling the download action is not DRM. Upload creates a private draft, not an automatic publication. Archived versions remain private for explicit rollback. Confirmed deletion of an inactive version removes its provider asset; provider failures preserve retryable metadata. Legacy local PDFs are read-only until migrated.
+
+## Media and Drive boundaries
+
+Sharp validates actual JPEG/PNG/WebP bytes, dimensions and animation, strips metadata and re-encodes WebP. SVG is intentionally rejected. Per-category byte limits and a pixel limit reduce resource abuse; only authorized admins can upload. Referenced assets cannot be deleted through the library. Stored provider delivery URLs are not accepted from the client; private document signatures are server-only.
+
+Cloudinary credentials stay in backend environment configuration. Drive imports use the minimal drive.file consent scope and Picker-selected file IDs; the backend fetches only fixed Google Drive endpoints with a short-lived access token held in request memory. Tokens are never saved or logged. The Picker API key is deliberately public and must be restricted to your origins and required Google APIs; it is not a Cloudinary/API secret.
+
+Resume preview acknowledgement is a workflow gate, not proof that a human reviewed every page. Visibility controls portfolio delivery, not copies already saved by visitors. Image URLs are public and can remain cached after content removal. Backups/asset inventory, CDN invalidation and manual partial-failure recovery remain necessary.
 
 ## Deployment responsibilities
 
-Use HTTPS, explicit proxy trust, restricted MongoDB access, durable storage/backups, current dependencies and monitoring. Process-local limits/log windows are not a distributed security system. MFA, account recovery/email verification, abuse moderation, hardware/browser acceptance and live Google/TypeWriter verification remain outside automated local acceptance.
+Use HTTPS, explicit proxy trust, restricted MongoDB access, MongoDB/Cloudinary backups, durable log/legacy-file storage, current dependencies and monitoring. Process-local limits/log windows are not a distributed security system. MFA, account recovery/email verification, abuse moderation, hardware/browser acceptance and live Google/TypeWriter verification remain deployment-specific acceptance responsibilities. v1.3.0 security changes received source review only: no executable validation was performed. Complete the [security/regression checklist](testing/REGRESSION_CHECKLIST.md).

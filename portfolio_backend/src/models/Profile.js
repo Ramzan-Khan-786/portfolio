@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { mediaField } from './mediaFields.js';
 
 const profileSchema = new mongoose.Schema(
   {
@@ -9,6 +10,7 @@ const profileSchema = new mongoose.Schema(
     bio: { type: String, required: true, trim: true },
     location: { type: String, trim: true },
     availability: { type: String, trim: true },
+    profileMedia: mediaField(),
     profileImage: { type: String, trim: true },
     resumeUrl: { type: String, trim: true },
     focusAreas: [{ type: String, trim: true }],

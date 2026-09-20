@@ -14,7 +14,12 @@ MongoDB models use Mongoose timestamps. Unique indexes enforce account and slug/
 | SocialLink     | Platform label/kind/URL/order/enabled                                                                                                   |
 | Setting        | Unique key/value; public keys explicitly allowlisted                                                                                    |
 | Page           | Unique nonreserved slug and published plain-text content                                                                                |
-| Resume         | Unique primary key, editable metadata/links, hidden current UUID filename and byte size                                                 |
+| Resume | Unique primary key, editable page metadata/links, currentVersion pointer; hidden legacy filename/size for read-only delivery |
+| ResumeVersion | Unique version number, media reference, unique SHA256, title/description, source, page/byte counts, preview/publication/archive timestamps |
+| MediaAsset | Provider IDs/type/folder, image/document metadata, private secureUrl, checksum, uploader and ready/deleting/delete-failed state |
+| ThemeSettings | Keyed global policy, curated enabled pool, universal fallback, override flag and revision |
+| ResumeCounter | Atomic monotonic version allocation; failed uploads can leave harmless numbering gaps |
+| CmsMutationLease | Short-lived MongoDB lease serializing CMS writes; owner, expiry and heartbeat |
 | AuthAttempt    | Unique hashed random proof, purpose/server-owned data, expiry with MongoDB TTL index                                                    |
 
 Profile remains a logical singleton for compatibility. Resume and ContentSection enforce keyed uniqueness. AuthAttempt expiry is checked at request time, not just eventually by TTL cleanup, and accepted proofs are consumed atomically. Google tokens themselves are never stored.
@@ -29,8 +34,12 @@ A showroom entry may remain public independently of its project, but an unpublis
 
 Existing saved admins have role=admin and retain their hash/session version. New users default to user, and all signup paths explicitly set user. Seed creates only absent admins and refuses to elevate existing normal users.
 
-Existing content receives compatible defaults; no real MongoDB mutation is performed by tests. Seed uses setOnInsert. The one targeted compatibility upgrade recognizes the exact unchanged legacy six-item navigation, moves Profile from / to /profile, adjusts the old default order and inserts Home/Resume. Customized records are preserved. Review customized navigation manually after upgrading. Seeding can recreate deleted defaults, so run deliberately after a backup.
+Existing content receives compatible defaults; no real MongoDB mutation was performed for this implementation. Seed uses setOnInsert. The one targeted compatibility upgrade recognizes the exact unchanged legacy six-item navigation, moves Profile from / to /profile, adjusts the old default order and inserts Home/Resume. Customized records are preserved. Review customized navigation manually after upgrading. Seeding can recreate deleted defaults, so run deliberately after a backup.
 
-Resume uploads are filesystem bytes plus MongoDB metadata: back up both together. Replaced/detached PDFs remain private and cannot be fetched by arbitrary filename. Prune old versions only with an explicit operator retention procedure, not broad directory deletion.
+New uploads are Cloudinary assets plus MongoDB metadata/references: back up both together. Profile/Skill/Project/Showroom/section images store managed media references while legacy URL fields remain compatible. Public responses hydrate only the referenced ready images; private Cloudinary delivery data is not exposed.
+
+Resume publication uses one authoritative currentVersion pointer; status is derived against it. Drafts/archived versions remain private. Generic media deletion refuses references from any resume version. CMS mutations acquire a database lease before provider work/content writes; conflicts return 409 rather than running reference deletion concurrently with a save. Provider and MongoDB writes are not an atomic transaction; compensation and retryable delete-failed records support recovery.
+
+Existing local resume files remain readable only through the established current legacy metadata until deliberately re-uploaded, previewed and published. No automatic migration, real DB write or deletion ran during this task. Keep legacy files/backups until manually verifying the replacement. ThemeSettings is created on first policy save; until then the old appearance document supplies a compatible fallback.
 
 Unique email/googleId indexes must be created successfully before enabling public registration. Resolve any pre-existing duplicate data through an approved maintenance procedure, not silent automatic deletion. Slug changes do not create redirects.

@@ -1,5 +1,19 @@
 # Version history
 
+## 1.3.0 — 2026-09-19 — Cloudinary CMS, resume versions and daisyUI policies
+
+- Centralized new image/PDF uploads in Cloudinary with validated in-memory input, server-owned IDs, metadata, reference checks and recoverable provider-failure handling.
+- Added shared browse/drop upload, library picker, previews, metadata/search/filter/sort, confirmed deletion and optional icon background removal.
+- Integrated managed Hero/Profile/About/Skills/Projects/gallery/Showroom media while retaining legacy URL fallbacks and saved content.
+- Added private resume drafts, duplicate checksum rejection, PDF.js preview, publish/archive/restore/delete, library reuse and optional scoped Google Drive Picker import.
+- Bundled one shared PDF.js viewer with text, links, search, page/zoom/fit/fullscreen controls and self-hosted supporting assets.
+- Refined admin theme management with mode cards, search/filter/pool presets, isolated previews, discard/save controls and separate workspace appearance. Random mode now draws once per reload; a manual choice lasts until the next reload, without cross-tab persistence.
+- Added ten daisyUI palettes, admin universal/random-reload/random-daily policies, visit-only optional visitor overrides and legacy theme mapping.
+- Reduced wheel effort and route-motion abruptness. Showroom parent chrome supports previous/next page gestures while staying non-scrollable; embedded application input remains isolated.
+- Added CMS write serialization, safe configuration/error/logging paths, dirty-form warnings and comprehensive manual test guides.
+- Bumped all package versions/locks to 1.3.0. Actual secrets, live MongoDB data and provider assets were not modified.
+- **Implementation-only release:** no tests, lint, builds, servers, browser automation or provider verification were run. Prior QA results do not certify these changes.
+
 ## 1.2.0 — 2026-09-19 — page-based portfolio and granular CMS
 
 - Replaced the stacked landing layout with eight distinct persistent-shell views and guarded boundary navigation.

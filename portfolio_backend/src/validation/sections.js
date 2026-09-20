@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { mediaReference } from './media.js';
 import { destination, optionalUrl } from './schemas.js';
 const line = (max = 240) => z.string().trim().max(max).default('');
 const list = (max = 240) => z.array(z.string().trim().min(1).max(max)).max(30).default([]);
@@ -24,6 +25,10 @@ export const sectionSchemas = {
       visible,
       eyebrow: line(100),
       greeting: line(80),
+      name: line(80),
+      imageMedia: mediaReference,
+      imagePosition: z.enum(['center', 'top', 'bottom', 'left', 'right']).default('center'),
+      imageVisible: visible,
       headline: line(180),
       introduction: line(600),
       imageUrl: optionalUrl,
@@ -49,6 +54,7 @@ export const sectionSchemas = {
       subtitle: line(300),
       heading: line(160),
       body: line(8000),
+      imageMedia: mediaReference,
       principles: list(500),
       experience: timeline,
     })

@@ -6,6 +6,7 @@ import FormFields from './FormFields.jsx';
 import { StatePanel } from '../../components/Ui.jsx';
 import { usePortfolio } from '../../context/PortfolioContext.jsx';
 import './ResourceManager.css';
+import useUnsavedChanges from '../../hooks/useUnsavedChanges.js';
 export default function ResourceManager({ resource, notify }) {
   const config = resources[resource];
   const { refresh } = usePortfolio();
@@ -19,6 +20,8 @@ export default function ResourceManager({ resource, notify }) {
   const [busy, setBusy] = useState(false);
   const [attempt, setAttempt] = useState(0);
   const editorRef = useRef(null);
+  const { dirty, markSaved } = useUnsavedChanges(values);
+  const close = () => { if (!dirty || window.confirm('Discard unsaved changes?')) { markSaved(values); setEditor(null); } };
   useEffect(() => {
     let active = true;
     setLoading(true);
@@ -47,8 +50,10 @@ export default function ResourceManager({ resource, notify }) {
     if (editor) editorRef.current?.querySelector('input,select,textarea')?.focus();
   }, [editor]);
   function open(record = config.defaults) {
+    if (editor && dirty && !window.confirm('Discard unsaved changes and open another record?')) return;
     setEditor(record);
-    setValues(toForm(record, config.fields));
+    const value = toForm(record, config.fields);
+    setValues(value); markSaved(value);
     setError('');
     setFieldErrors({});
   }
@@ -59,6 +64,7 @@ export default function ResourceManager({ resource, notify }) {
     setFieldErrors({});
     try {
       await apiClient.save(resource, toPayload(values, config.fields), editor._id);
+      markSaved(values);
       notify(config.singular + ' saved.');
       setEditor(null);
       setAttempt((value) => value + 1);
@@ -77,7 +83,7 @@ export default function ResourceManager({ resource, notify }) {
     setError('');
     try {
       await apiClient.remove(resource, record._id);
-      if (editor?._id === record._id) setEditor(null);
+      if (editor?._id === record._id) { markSaved(values); setEditor(null); }
       notify('Record deleted.');
       setAttempt((value) => value + 1);
       refresh();
@@ -123,7 +129,7 @@ export default function ResourceManager({ resource, notify }) {
               type="button"
               disabled={busy}
               aria-label="Close editor"
-              onClick={() => setEditor(null)}
+              onClick={close}
             >
               <X size={18} />
             </button>
@@ -134,7 +140,7 @@ export default function ResourceManager({ resource, notify }) {
               values={values}
               errors={fieldErrors}
               projects={projects}
-              onChange={(key, value) => setValues({ ...values, [key]: value })}
+              onChange={(key, value) => setValues((current) => ({ ...current, [key]: value }))}
             />
           </fieldset>
           <div className="mt-6 flex flex-wrap justify-end gap-3">
@@ -142,7 +148,7 @@ export default function ResourceManager({ resource, notify }) {
               type="button"
               className="cms-secondary"
               disabled={busy}
-              onClick={() => setEditor(null)}
+              onClick={close}
             >
               Cancel
             </button>

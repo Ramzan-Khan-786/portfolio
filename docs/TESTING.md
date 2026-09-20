@@ -1,5 +1,13 @@
 # Testing
 
+## v1.3.0 status: implementation only
+
+No tests, lint, builds, formatting checks, dev servers, browser automation, API/provider test calls or real database writes were executed for this update. Start with [MANUAL_TESTING_GUIDE](testing/MANUAL_TESTING_GUIDE.md) and its Cloudinary/resume/theme/CMS/regression checklists. Every case is unverified until an operator records its outcome.
+
+The existing automated suites below belong to the earlier v1.2 contracts. Local-file resume upload/immediate publication, five-theme labels and Showroom gesture exclusion are stale expectations. Update these fixtures for Cloudinary provider boundaries, draft → preview → publish, ten daisyUI policies and parent-chrome Showroom navigation before execution. Do not point tests at real Cloudinary or a real CMS database by default. No large replacement automated suite was added in this implementation.
+
+## Existing automated tooling (operator reference)
+
 Run commands from the Portfolio root. Tests must never target your real CMS database. NODE_ENV=test disables .env loading; integration and browser fixtures create ephemeral MongoDB instances with test-only users.
 
 ## Fast checks
@@ -40,7 +48,7 @@ For an already installed Chromium, optionally set QA_BROWSER_PATH to its verifie
 
 Playwright starts the isolated API on 5101, an explicitly labelled independent iframe fixture on 5191, and Vite on 5179. Those ports must be free. Test user credentials exist only in the ephemeral QA database and are never read from your .env. Do not run this fixture as a deployed service.
 
-Twenty-three browser checks (eight public viewport cases, eight admin viewport cases, and seven flow cases) verify:
+The historical v1.2 suite contains twenty-three browser checks (eight public viewport cases, eight admin viewport cases and seven flow cases) covering:
 
 1. Public routes at all eight widths, mobile navigation, iframe interaction, Coming Soon, both switch directions, and 404.
 2. Actual CMS login → profile/skill/project/showroom/page/navigation/social writes → MongoDB → public page/detail/default → logout denial.
@@ -54,10 +62,10 @@ Twenty-three browser checks (eight public viewport cases, eight admin viewport c
 
 Do not edit frontend source or run the formatter while these tests run: Vite HMR can interrupt navigation and invalidate screenshot evidence. Run on a stable checkout. Tests use a single browser worker to avoid data races between scenarios.
 
-## Evidence
+## Historical evidence (not current acceptance)
 
 - artifacts/qa/*.png: representative screenshots; review them visually.
-- playwright-report/index.html: latest browser report.
+- playwright-report/index.html: saved earlier browser report; not evidence for the current code.
 - test-results/: failure screenshots, context, and retained traces.
 - CLI output: current unit/integration, lint, formatting, build results.
 
@@ -75,7 +83,7 @@ npm.cmd audit
 
 Review advisories before applying updates. Do not use force upgrades as a substitute for compatibility testing.
 
-## New V1 security coverage
+## Historical V1 security coverage
 
 The API suite also exercises signup role protection, account suspension, verified-Google new-password/account-linking flows, nonce/expiry/replay rejection, structured CMS validation, PDF header/type/size/active-content checks, download/visibility controls, navigation compatibility and categorized file-log redaction. Google tests mock only the external official token verifier, with the real controller/challenge/database/session path running. They do not prove real Google consent or configured client/origin acceptance.
 

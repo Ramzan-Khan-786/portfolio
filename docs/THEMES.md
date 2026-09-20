@@ -1,15 +1,15 @@
 # Themes and motion
 
-Five CSS-token themes: Dark, Light, Midnight, Graphite, Fieldwork (stored key terminal). Each defines background/surface/elevated surface, primary/secondary/muted text, border, accent/hover/on-accent, soft accent, code background, danger colors and shadow.
+The canonical [theme system guide](theme-system.md) describes the shared ten-theme daisyUI catalogue, backend policy, per-reload/daily assignment, visit-only visitor overrides, storage fallback and migration. Admin → Themes previews and saves the actual palettes.
 
-Tokens live in src/styles/themes.css; base.css only holds reset, token import, typography/focus and reduced-motion foundations. Tailwind colors map to tokens so routine utilities participate in themes. Component CSS handles distinctive layout; the global stylesheet is not a page-style dump.
-
-ThemeProvider reads CMS appearance preferences and localStorage portfolio-theme. The first visit follows system preference unless the CMS disables it and provides a default. A returning enabled visitor choice wins. The inline head script applies a saved valid palette before React initializes, reducing theme flash; server-owned restrictions are applied after bootstrap.
-
-The native labeled selector is keyboard accessible. Dark/light/system changes do not introduce a separate theme dependency. CMS/account inputs, tables, drawers, notices and actions use the same tokens. Embedded third-party apps and browser PDF viewers control their own internal theme.
+Tailwind 3 and daisyUI 4 remain compatible with the existing React/Vite architecture. Existing semantic CSS tokens map to daisyUI's OKLCH variables; page/component CSS keeps responsibility for layout. Public, account and admin surfaces share the selected palette. Third-party iframe content and the PDF document itself keep their own appearance.
 
 ## Page transitions
 
-Route content enters with a restrained 340 ms fade/translation between persistent navbar/footer rows. Ordinary scroll continues inside the route. A fresh boundary gesture can navigate to the next/previous enabled core page with momentum and transition locks. The footer provides explicit controls and a persistent opt-out.
+Route content enters with a restrained 420ms fade/10px translation between persistent navbar/footer rows. Long content scrolls normally inside the route. At the true boundary, 36px of accumulated wheel movement or a 48px vertical swipe can navigate to the adjacent enabled core page. Slow deliberate wheel input counts; rapid scrolling is not required. Transition and momentum-tail guards prevent an input burst from skipping pages.
 
-prefers-reduced-motion suppresses animations and automatically disables wheel/touch route navigation. Showroom disables automatic route navigation even outside its iframe, so interacting with the application cannot move to another portfolio page. Project selection transitions are separately bounded to 340 ms and clean up their outgoing frame.
+Showroom remains a fixed-height, non-scrollable experience. Scroll on its heading, caption or surrounding chrome to navigate to the previous/next portfolio page. Events inside a cross-origin iframe belong to the embedded app and cannot be captured by the parent. No gesture-blocking overlay is placed over the application. Project selection transitions remain independently bounded to 340ms.
+
+The footer provides explicit navigation and a persistent scroll-navigation opt-out. prefers-reduced-motion suppresses animation and disables wheel/touch route changes. Nested scrollers, forms, PDF controls, horizontal gestures and modifier zoom are protected.
+
+v1.3.0 implementation is not runtime-verified. Use the [theme checklist](testing/THEME_TESTING.md) and [regression checklist](testing/REGRESSION_CHECKLIST.md).

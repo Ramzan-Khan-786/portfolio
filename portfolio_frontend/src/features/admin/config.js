@@ -11,6 +11,7 @@ export const sections = [
   ['projects', 'Projects'],
   ['showroom', 'Showroom'],
   ['resume', 'Resume'],
+  ['media', 'Media library'],
   ['contact', 'Contact'],
   ['navigation', 'Navigation'],
   ['pages', 'Pages'],
@@ -34,7 +35,8 @@ export const profileFields = [
   field('bio', 'About / biography', 'textarea', { required: true, minLength: 10, maxLength: 4000 }),
   field('location', 'Location'),
   field('availability', 'Availability'),
-  field('profileImage', 'Profile image URL', 'url'),
+  field('profileMedia', 'Profile photo', 'media', { category: 'profile' }),
+  field('profileImage', 'Legacy profile image URL', 'url'),
   field('resumeUrl', 'Resume URL', 'url'),
   field('focusAreas', 'Focus areas', 'array', { help: 'Separate entries with commas.' }),
   field('primaryCtaLabel', 'Primary action label'),
@@ -52,7 +54,9 @@ export const resources = {
     fields: [
       field('name', 'Skill name', 'text', { required: true }),
       field('category', 'Category', 'text', { required: true }),
-      field('iconUrl', 'Icon URL', 'url'),
+      field('iconMedia', 'Skill icon', 'media', { category: 'skills' }),
+      field('iconUrl', 'Legacy icon URL', 'url'),
+      field('featured', 'Featured skill', 'checkbox'),
       field('description', 'Description', 'textarea', { maxLength: 280 }),
       order,
       field('visible', 'Visible on portfolio', 'checkbox'),
@@ -76,7 +80,10 @@ export const resources = {
       }),
       field('description', 'Full description', 'textarea', { maxLength: 5000 }),
       field('category', 'Category'),
-      field('imageUrl', 'Cover image URL', 'url'),
+      field('thumbnailMedia', 'Project thumbnail', 'media', { category: 'projects' }),
+      field('coverMedia', 'Project cover', 'media', { category: 'projects' }),
+      field('gallery', 'Project gallery', 'gallery', { category: 'projects', max: 8 }),
+      field('imageUrl', 'Legacy cover URL', 'url'),
       field('screenshots', 'Screenshot URLs', 'lines', {
         help: 'One HTTP(S) image URL per line, up to eight.',
       }),
@@ -113,6 +120,9 @@ export const resources = {
       field('project', 'Associated project', 'project'),
       field('description', 'Description', 'textarea', { maxLength: 600 }),
       field('presentationType', 'Presentation', 'select', { options: ['iframe', 'coming-soon'] }),
+      field('previewMedia', 'Preview image', 'media', { category: 'showroom' }),
+      field('iconMedia', 'Project icon', 'media', { category: 'showroom' }),
+      field('fallbackMedia', 'Unavailable screenshot', 'media', { category: 'showroom' }),
       field('embedUrl', 'Integration URL', 'url', {
         help: 'Independent app URL that allows embedding. Leave blank while deployment is in preparation.',
       }),
@@ -216,7 +226,7 @@ export function toForm(record, fields) {
       const value = record?.[name];
       return [
         name,
-        type === 'repeater' || type === 'choices'
+        type === 'media' ? value || null : type === 'gallery' ? value || [] : type === 'repeater' || type === 'choices'
           ? value || []
           : type === 'checkbox'
             ? Boolean(value)
@@ -238,6 +248,9 @@ export function toPayload(values, fields) {
           .split(type === 'lines' ? /\n/ : /,/)
           .map((entry) => entry.trim())
           .filter(Boolean);
+      const reference = (item) => item?.mediaId ? { mediaId: item.mediaId, altText: item.altText || '', caption: item.caption || '' } : null;
+      if (type === 'media') value = reference(value);
+      if (type === 'gallery') value = (value || []).map(reference).filter(Boolean);
       if (type === 'project') value = value || null;
       if (type === 'number') value = value === '' ? undefined : Number(value);
       return [name, value];

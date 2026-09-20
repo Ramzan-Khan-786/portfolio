@@ -3,6 +3,7 @@ import { apiClient } from '../../lib/api.js';
 import { usePortfolio } from '../../context/PortfolioContext.jsx';
 import { StatePanel } from '../../components/Ui.jsx';
 import FormFields from './FormFields.jsx';
+import useUnsavedChanges from '../../hooks/useUnsavedChanges.js';
 import { toForm, toPayload } from './config.js';
 export default function ContentEditor({ section, config, notify }) {
   const { refresh } = usePortfolio();
@@ -11,13 +12,14 @@ export default function ContentEditor({ section, config, notify }) {
     [errors, setErrors] = useState({}),
     [busy, setBusy] = useState(false),
     [attempt, setAttempt] = useState(0);
+  const { markSaved } = useUnsavedChanges(values);
   useEffect(() => {
     let active = true;
     setError('');
     apiClient
       .get('content/' + section)
       .then((data) => {
-        if (active) setValues(toForm(data, config.fields));
+        if (active) { const value = toForm(data, config.fields); setValues(value); markSaved(value); }
       })
       .catch((e) => {
         if (active) setError(e.message);
@@ -25,7 +27,7 @@ export default function ContentEditor({ section, config, notify }) {
     return () => {
       active = false;
     };
-  }, [section, config, attempt]);
+  }, [section, config, attempt, markSaved]);
   async function save(event) {
     event.preventDefault();
     setBusy(true);
@@ -33,6 +35,7 @@ export default function ContentEditor({ section, config, notify }) {
     setErrors({});
     try {
       await apiClient.put('content/' + section, toPayload(values, config.fields));
+      markSaved(values);
       notify(config.title + ' saved.');
       refresh();
     } catch (e) {
@@ -63,7 +66,7 @@ export default function ContentEditor({ section, config, notify }) {
               fields={config.fields}
               values={values}
               errors={errors}
-              onChange={(name, value) => setValues({ ...values, [name]: value })}
+              onChange={(name, value) => setValues((current) => ({ ...current, [name]: value }))}
             />
           </fieldset>
           <button className="admin-primary mt-6" disabled={busy}>

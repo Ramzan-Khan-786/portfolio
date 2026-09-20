@@ -1,9 +1,13 @@
 import mongoose from 'mongoose';
+import { mediaField } from './mediaFields.js';
 
 const showroomItemSchema = new mongoose.Schema(
   {
     label: { type: String, required: true, trim: true },
     project: { type: mongoose.Schema.Types.ObjectId, ref: 'Project', default: null },
+    previewMedia: mediaField(),
+    iconMedia: mediaField(),
+    fallbackMedia: mediaField(),
     description: { type: String, trim: true, default: '' },
     presentationType: {
       type: String,

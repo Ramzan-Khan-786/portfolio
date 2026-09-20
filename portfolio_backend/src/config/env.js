@@ -23,6 +23,14 @@ const sameSite = process.env.COOKIE_SAME_SITE || 'lax';
 if (!['lax', 'strict', 'none'].includes(sameSite) || (sameSite === 'none' && !secure))
   throw new Error('SameSite=None requires secure cookies.');
 export const env = {
+  cloudinaryCloudName: process.env.CLOUDINARY_CLOUD_NAME || '',
+  cloudinaryApiKey: process.env.CLOUDINARY_API_KEY || '',
+  cloudinaryApiSecret: process.env.CLOUDINARY_API_SECRET || '',
+  cloudinaryFolder: /^[a-zA-Z0-9_-]{1,60}$/.test(process.env.CLOUDINARY_FOLDER || '') ? process.env.CLOUDINARY_FOLDER : 'portfolio',
+  cloudinaryBackgroundRemoval: process.env.CLOUDINARY_BACKGROUND_REMOVAL_ENABLED === 'true',
+  googleDriveClientId: process.env.GOOGLE_DRIVE_CLIENT_ID || '',
+  googleDriveApiKey: process.env.GOOGLE_DRIVE_API_KEY || '',
+  googleDriveAppId: process.env.GOOGLE_DRIVE_APP_ID || '',
   googleClientId: process.env.GOOGLE_CLIENT_ID || '',
   uploadDir:
     process.env.UPLOAD_DIR || fileURLToPath(new URL('../../uploads/resumes', import.meta.url)),

@@ -1,0 +1,15 @@
+.resume-viewer { width:100%; min-width:0; border:1px solid var(--border); background:var(--surface); border-radius:4px; overflow:hidden; }
+.pdf-toolbar { display:flex; flex-wrap:wrap; gap:.5rem 1rem; padding:.75rem; border-bottom:1px solid var(--border); font-size:.76rem; }
+.pdf-tool-group { display:flex; align-items:center; gap:.6rem; flex-wrap:wrap; }
+.pdf-toolbar button,.pdf-toolbar a { min-height:34px; padding:.35rem .5rem; border:1px solid var(--border); border-radius:3px; background:var(--bg); color:var(--text); }
+.pdf-toolbar input { color:var(--text); background:var(--bg); border:1px solid var(--border); border-radius:3px; min-height:34px; padding:.35rem; }
+.pdf-tool-group input { width:3.5rem; }
+.pdf-search { width:100%; display:flex; flex-wrap:wrap; align-items:center; gap:.5rem; }
+.pdf-search input { flex:1 1 140px; min-width:0; }
+.pdf-status { padding:.8rem; font-size:.82rem; }
+.pdf-stage { position:relative; height:clamp(360px,68dvh,900px); min-width:0; }
+.pdf-scroll { position:absolute; inset:0; overflow:auto; overscroll-behavior:contain; background:#74787c; }
+.resume-viewer:fullscreen { display:flex; flex-direction:column; background:var(--bg); }
+.resume-viewer:fullscreen .pdf-stage { flex:1; height:auto; }
+.pdfViewer .page { color:#000; background:#fff; }
+@media(max-width:600px) { .pdf-stage { height:65dvh; } .pdf-toolbar { padding:.5rem; gap:.5rem; } }

@@ -1,4 +1,6 @@
 import express from 'express';
+import { getResume } from './controllers/resumeController.js';
+import { getThemes } from './controllers/themeController.js';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
@@ -54,6 +56,8 @@ app.use('/api/auth/google', limiter(40));
 app.use('/api/auth/google/complete', limiter(15));
 app.use('/api/auth/password', limiter(10));
 app.use('/api/auth', authRoutes);
+app.get('/api/resume/current', getResume);
+app.get('/api/theme/settings', getThemes);
 app.use('/api/public', publicRoutes);
 app.use('/api/admin', limiter(500), adminRoutes);
 app.use(notFound);

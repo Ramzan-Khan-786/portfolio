@@ -16,8 +16,8 @@ export function errorHandler(error, _req, res, _next) {
     status = error.code === 'LIMIT_FILE_SIZE' ? 413 : 422;
     message =
       error.code === 'LIMIT_FILE_SIZE'
-        ? 'Resume PDFs must be under 5 MB.'
-        : 'Upload one PDF file using the file field.';
+        ? 'File exceeds the upload limit. Images: 8 MB; icons: 2 MB; PDFs: 5 MB.'
+        : 'Upload one supported file using the file field.';
   } else if (error.name === 'CastError') {
     status = 400;
     message = 'Invalid record identifier.';

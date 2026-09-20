@@ -38,7 +38,7 @@ export default function PublicLayout() {
   }, []);
   const isShowroom = location.pathname === '/showroom';
   useBoundaryNavigation(scroll, {
-    enabled: scrollNavigation && !reduced && !isShowroom && status === 'ready' && index >= 0,
+    enabled: scrollNavigation && !reduced && status === 'ready' && index >= 0,
     routeKey: location.key,
     previous,
     next,

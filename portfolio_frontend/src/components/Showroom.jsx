@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { ArrowLeft, ArrowRight, ArrowUpRight, Github, FlaskConical } from 'lucide-react';
 import { usePortfolio } from '../context/PortfolioContext.jsx';
-import { ContentLink, StatePanel } from './Ui.jsx';
+import { ContentImage, ContentLink, StatePanel } from './Ui.jsx';
 import EmbeddedProject from '../features/showroom/EmbeddedProject.jsx';
 import './Showroom.css';
 export function getShowroomMotion(previous, next) {
@@ -10,7 +10,7 @@ export function getShowroomMotion(previous, next) {
 function Presentation({ item }) {
   return item.status === 'coming-soon' || item.presentationType === 'coming-soon' ? (
     <div className="showroom-message">
-      <FlaskConical size={27} />
+      {item.previewMedia?.url ? <ContentImage src={item.previewMedia.url} alt={item.previewMedia.altText || item.label} className="showroom-support-image" /> : <FlaskConical size={27} />}
       <p className="eyebrow">Coming soon</p>
       <h2>{item.label}</h2>
       <p>
@@ -66,13 +66,13 @@ export default function Showroom() {
     }
   }
   return (
-    <section className="showroom-page" data-scroll-lock aria-labelledby="showroom-title">
+    <section className="showroom-page" aria-labelledby="showroom-title">
       <header className="showroom-heading">
         <div className="flex items-center gap-4">
           <span className="eyebrow m-0">05 / Live environment</span>
           <h1 id="showroom-title">Engineering showroom</h1>
         </div>
-        <span className="showroom-hint">Use the application. Explore the implementation.</span>
+        <span className="showroom-hint">Scroll here to change pages. Scroll inside the app to use it.</span>
       </header>
       <div className="project-selector" role="tablist" aria-label="Showroom projects">
         {items.map((item, position) => (
@@ -90,6 +90,7 @@ export default function Showroom() {
             onKeyDown={(event) => keyDown(event, position)}
           >
             <span>{String(position + 1).padStart(2, '0')}</span>
+            {item.iconMedia?.url && <ContentImage src={item.iconMedia.url} alt="" className="showroom-tab-icon" />}
             {item.label}
             {item.status === 'coming-soon' && <small>soon</small>}
           </button>

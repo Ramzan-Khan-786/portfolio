@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { cloudinaryConfigured } from '../services/cloudinary/service.js';
 import User from '../models/User.js';
 import { env } from '../config/env.js';
 import { audit, recentEvents } from '../services/logger.js';
@@ -45,6 +46,8 @@ export const operations = (_req, res) =>
     data: {
       database: mongoose.connection.readyState === 1 ? 'connected' : 'unavailable',
       googleConfigured: Boolean(env.googleClientId),
+      cloudinaryConfigured: cloudinaryConfigured(),
+      driveImportConfigured: Boolean(env.googleDriveClientId && env.googleDriveApiKey && env.googleDriveAppId),
       fileLogging: env.nodeEnv !== 'test',
       logFiles: ['error.log', 'combined.log', 'http.log', 'auth.log', 'admin.log'],
       rotation: '5 MB per file, 5 retained files per category',

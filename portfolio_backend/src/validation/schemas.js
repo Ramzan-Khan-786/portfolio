@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { mediaReference, mediaReferenceValue } from './media.js';
 const text = (min, max) => z.string().trim().min(min).max(max);
 const webUrl = z
   .string()
@@ -64,6 +65,7 @@ export const profileSchema = z.object({
   location: text(0, 120).optional(),
   availability: text(0, 140).optional(),
   profileImage: optionalUrl,
+  profileMedia: mediaReference,
   resumeUrl: optionalUrl,
   focusAreas: z.array(text(1, 60)).max(12).default([]),
   primaryCtaLabel: text(0, 50).default('View work'),
@@ -72,6 +74,8 @@ export const profileSchema = z.object({
   secondaryCtaUrl: destination.default('/showroom'),
 });
 export const skillSchema = z.object({
+  iconMedia: mediaReference,
+  featured: z.boolean().default(false),
   iconUrl: optionalUrl,
   name: text(1, 80),
   category: text(1, 80),
@@ -86,6 +90,9 @@ export const projectSchema = z.object({
   description: text(0, 5000).default(''),
   category: text(0, 80).default(''),
   imageUrl: optionalUrl,
+  thumbnailMedia: mediaReference,
+  coverMedia: mediaReference,
+  gallery: z.array(mediaReferenceValue).max(8).default([]),
   screenshots: z.array(webUrl).max(8).default([]),
   technologies: z.array(text(1, 48)).max(20).default([]),
   githubUrl: optionalUrl,
@@ -129,6 +136,9 @@ export const navigationSchema = z
 export const showroomSchema = z
   .object({
     label: text(1, 80),
+    previewMedia: mediaReference,
+    iconMedia: mediaReference,
+    fallbackMedia: mediaReference,
     project: z
       .string()
       .regex(/^[a-f\d]{24}$/i)

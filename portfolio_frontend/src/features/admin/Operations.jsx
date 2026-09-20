@@ -48,6 +48,8 @@ export default function Operations() {
           <dl className="cms-editor grid gap-5 sm:grid-cols-2">
             {[
               ['Database', data.database],
+              ['Cloudinary uploads', data.cloudinaryConfigured ? 'Configured; manual delivery check required' : 'Not configured'],
+              ['Google Drive import', data.driveImportConfigured ? 'Configured; manual consent check required' : 'Not configured'],
               [
                 'Google sign-in',
                 data.googleConfigured

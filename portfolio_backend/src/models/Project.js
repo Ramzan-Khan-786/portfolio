@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { mediaField, mediaSchema } from './mediaFields.js';
 
 const projectSchema = new mongoose.Schema(
   {
@@ -6,6 +7,9 @@ const projectSchema = new mongoose.Schema(
     slug: { type: String, required: true, unique: true, lowercase: true, trim: true },
     summary: { type: String, required: true, trim: true },
     description: { type: String, trim: true, default: '' },
+    thumbnailMedia: mediaField(),
+    coverMedia: mediaField(),
+    gallery: { type: [mediaSchema], default: [] },
     imageUrl: { type: String, trim: true, default: '' },
     category: { type: String, trim: true, default: '' },
     screenshots: [{ type: String }],

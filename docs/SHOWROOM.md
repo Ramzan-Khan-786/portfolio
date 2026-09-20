@@ -31,7 +31,9 @@ Browser security prevents reliable introspection of cross-origin frames. In part
 
 A frame's own responsive UI is the independent application's responsibility. Portfolio CSS cannot repair a fixed-width page inside a cross-origin iframe. Test the real app at the target widths.
 
-The entire Showroom route disables boundary-scroll navigation. Navbar/footer remain persistent; the selector and compact caption surround a large interactive viewport. CMS fields include GitHub/technology overrides and fallback text; missing overrides reuse the associated public project.
+Showroom stays viewport-sized with no vertical page scrolling added. Gentle wheel/touch gestures on its heading, caption or outer chrome navigate to the previous/next enabled portfolio route. Gesture events inside the iframe stay inside that app; its stage is protected, and no overlay intercepts typing/scrolling. The footer opt-out and reduced-motion preference still disable route gestures. Navbar/footer remain persistent; the selector and compact caption surround the interactive viewport.
+
+CMS fields include managed preview, icon and fallback media through the shared uploader/library, plus GitHub/technology overrides and fallback text. Missing overrides reuse the associated public project. Media stays bounded so it does not lengthen the Showroom page. Coming-soon/unavailable panels are non-scrollable, clamp long copy and hide nonessential details on short screens. Current scrolling/media changes have not been browser-verified; use the [regression checklist](testing/REGRESSION_CHECKLIST.md).
 
 ## Selection, motion, and lifecycle
 

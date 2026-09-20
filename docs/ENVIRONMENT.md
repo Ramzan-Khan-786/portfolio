@@ -18,7 +18,15 @@ Existing .env files are ignored by Git and must not be overwritten during upgrad
 | SEED_ADMIN_EMAIL    | required by seed, normalized to lowercase                                                                 |
 | SEED_ADMIN_PASSWORD | required to create a new admin, at least 12 characters and at most 72 UTF-8 bytes, no example placeholder |
 | GOOGLE_CLIENT_ID    | Optional Google Identity Services web client ID; absence disables Google sign-in honestly                 |
-| UPLOAD_DIR          | Optional absolute private PDF directory; defaults to backend/uploads/resumes; requires durable storage    |
+| UPLOAD_DIR | Read-only legacy PDF directory; defaults to backend/uploads/resumes. Keep durable storage until old publication is deliberately migrated. |
+| CLOUDINARY_CLOUD_NAME | Required for managed uploads/delivery; server-side Cloudinary account name |
+| CLOUDINARY_API_KEY | Required for uploads/private documents; backend only |
+| CLOUDINARY_API_SECRET | Required for uploads/private documents; backend secret, never VITE-prefixed |
+| CLOUDINARY_FOLDER | portfolio by default; server-owned category/version folders are nested here |
+| CLOUDINARY_BACKGROUND_REMOVAL_ENABLED | false by default; only enable after configuring the supported paid/account transformation |
+| GOOGLE_DRIVE_CLIENT_ID | Optional browser OAuth web client ID for drive.file import; may differ from GOOGLE_CLIENT_ID |
+| GOOGLE_DRIVE_API_KEY | Optional Picker browser key, restricted by HTTP referrer and API; public by design |
+| GOOGLE_DRIVE_APP_ID | Optional numeric Google Cloud project number for Picker |
 | LOG_DIR             | Optional absolute private log directory; defaults to backend/logs                                         |
 | TYPEWRITER_URL      | optional seed-only HTTP(S) URL; never overwrites existing showroom/project records                        |
 
@@ -38,7 +46,15 @@ Do not paste secrets into documentation, screenshots, commits, or support logs. 
 | VITE_PROXY_TARGET   | http://localhost:5000; Vite development proxy only                          |
 | VITE_TYPEWRITER_URL | optional HTTP(S) fallback for an item linked to the typewriter project slug |
 
+Cloudinary needs no frontend secret or direct unsigned upload preset. Drive configuration is returned only to the authenticated admin by /admin/media/config; the browser receives only its public client ID/restricted key/project number, never Cloudinary credentials. Configure Picker/Drive APIs and exact OAuth browser origins as described in [resume management](resume-management.md).
+
 All VITE variables are public and compiled into the browser bundle. Rebuild after changing them. CMS Integration URL takes priority over Full project URL and the build-time fallback.
+
+## Runtime and implementation status
+
+Use Node 22.13+ or a supported newer LTS for PDF.js 5 and native Sharp compatibility. Keep repository-level shared/themes.js accessible to both applications. Restart/rebuild manually after configuration changes as appropriate.
+
+No actual .env values were inspected, replaced or printed for v1.3.0. Missing provider configuration is reported by the CMS; it is not claimed to be connected or verified.
 
 ## Test-only controls
 

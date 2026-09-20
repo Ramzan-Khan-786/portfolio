@@ -1,4 +1,8 @@
 import Profile from '../models/Profile.js';
+import MediaAsset from '../models/MediaAsset.js';
+import ResumeVersion from '../models/ResumeVersion.js';
+import { readThemeSettings } from './themeController.js';
+import { hydrateMedia, validateReferences } from '../services/mediaReferences.js';
 import Project from '../models/Project.js';
 import ShowroomItem from '../models/ShowroomItem.js';
 import Skill from '../models/Skill.js';
@@ -32,9 +36,10 @@ const publicFilter = (resource) =>
         ? { visible: true }
         : { enabled: true };
 export const getProfile = asyncHandler(async (_req, res) =>
-  res.json({ ok: true, data: await Profile.findOne() }),
+  res.json({ ok: true, data: await hydrateMedia(await Profile.findOne()) }),
 );
 export const updateProfile = asyncHandler(async (req, res) => {
+  await validateReferences(req.validatedBody);
   const current = await Profile.findOne();
   const data = current
     ? await Profile.findByIdAndUpdate(current.id, req.validatedBody, {
@@ -59,7 +64,7 @@ export const list = (resource, { publicOnly = false } = {}) =>
             )
             .sort({ order: 1, _id: 1 })
             .lean();
-    res.json({ ok: true, data });
+    res.json({ ok: true, data: await hydrateMedia(data) });
   });
 function cleanInput(resource, body) {
   const input = { ...body };
@@ -76,6 +81,7 @@ export const create = (resource) =>
   asyncHandler(async (req, res) => {
     const input = cleanInput(resource, req.validatedBody);
     if (resource === 'showroom') await checkProject(input);
+    await validateReferences(input);
     const document = await models[resource].create(input);
     if (resource === 'showroom') await setDefault(document, input.isDefault);
     res.status(201).json({ ok: true, data: document });
@@ -88,6 +94,7 @@ export const update = (resource) =>
     if (!existing) throw new ApiError(404, 'Record not found.');
     if (resource === 'settings' && existing.key === 'defaultShowroomId')
       throw new ApiError(403, 'Manage the default through Showroom.');
+    await validateReferences(input);
     const document = await models[resource].findByIdAndUpdate(req.params.id, input, {
       new: true,
       runValidators: true,
@@ -131,9 +138,13 @@ export const dashboard = asyncHandler(async (_req, res) => {
       navigation,
       recent,
       users,
+      mediaAssets: await MediaAsset.countDocuments(),
+      resumeVersions: await ResumeVersion.countDocuments(),
+      themeMode: (await readThemeSettings()).mode,
       resume: {
         visible: resume?.visible ?? true,
-        hasFile: Boolean(resume?.filename),
+        hasFile: Boolean(resume?.currentVersion || resume?.filename),
+        version: resume?.currentVersion ? (await ResumeVersion.findById(resume.currentVersion).select('version'))?.version : null,
         externalUrl: Boolean(resume?.externalUrl),
       },
       lastContentUpdate: lastSection?.updatedAt || null,
@@ -157,16 +168,11 @@ export const bootstrap = asyncHandler(async (_req, res) => {
   ]);
   res.json({
     ok: true,
-    data: {
-      profile,
-      skills,
-      projects,
-      showroom,
-      navigation,
-      socials,
-      settings,
+    data: await hydrateMedia({
+      profile, skills, projects, showroom, navigation, socials, settings,
       sections: await publicSections(),
-    },
+      themeSettings: await readThemeSettings(),
+    }),
   });
 });
 export const projectDetail = asyncHandler(async (req, res) => {
@@ -176,7 +182,7 @@ export const projectDetail = asyncHandler(async (req, res) => {
     archived: false,
   }).lean();
   if (!data) throw new ApiError(404, 'Project not found.');
-  res.json({ ok: true, data });
+  res.json({ ok: true, data: await hydrateMedia(data) });
 });
 export const pageDetail = asyncHandler(async (req, res) => {
   const data = await Page.findOne({ slug: req.params.slug, published: true }).lean();

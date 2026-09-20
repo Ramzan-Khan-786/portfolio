@@ -43,11 +43,14 @@ export default function Dashboard() {
           <div className="grid gap-px overflow-hidden rounded-md border border-line bg-line sm:grid-cols-2 xl:grid-cols-4">
             {[
               ['Total projects', stats.projects, 'projects'],
+              ['Media assets', stats.mediaAssets, 'media'],
+              ['Resume versions', stats.resumeVersions, 'resume'],
+              ['Theme mode', stats.themeMode, 'appearance'],
               ['Published projects', stats.liveProjects, 'projects'],
               ['Registered users', stats.users, 'users'],
               [
                 'Resume',
-                stats.resume?.hasFile ? 'PDF' : stats.resume?.externalUrl ? 'Linked' : 'No file',
+                stats.resume?.version ? 'v' + stats.resume.version : stats.resume?.hasFile ? 'Legacy PDF' : stats.resume?.externalUrl ? 'Linked' : 'No file',
                 'resume',
               ],
               ['Showroom items', stats.showroom, 'showroom'],
@@ -62,6 +65,7 @@ export default function Dashboard() {
               </Link>
             ))}
           </div>
+          <div className="flex flex-wrap gap-3 mt-6">{[['resume', 'Upload resume'], ['media', 'Upload media'], ['projects', 'Add project'], ['appearance', 'Change theme'], ['hero', 'Edit hero']].map(([route, label]) => <Link key={route} className="btn btn-sm btn-outline" to={'/admin/' + route}>{label}</Link>)}</div>
           <div className="cms-editor mt-6">
             <p className="text-xs text-muted mb-4">
               Latest section update:{' '}

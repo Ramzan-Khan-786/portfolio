@@ -9,7 +9,7 @@ export class ApiRequestError extends Error {
 }
 export async function api(path, options = {}) {
   const controller = new AbortController();
-  const timeout = window.setTimeout(() => controller.abort(), 12000);
+  const timeout = window.setTimeout(() => controller.abort(), options.timeoutMs || 12000);
   try {
     const response = await fetch(`${baseUrl}${path}`, {
       ...options,
@@ -46,6 +46,9 @@ export async function api(path, options = {}) {
   }
 }
 export const apiClient = {
+  themes: () => api('/public/themes'),
+  post: (resource, values = {}, timeoutMs = 12000) => api('/admin/' + resource, { method: 'POST', body: JSON.stringify(values), timeoutMs }),
+  deleteConfirmed: (resource) => api('/admin/' + resource, { method: 'DELETE', body: JSON.stringify({ confirm: 'DELETE' }), timeoutMs: 120000 }),
   detachResume: () => api('/admin/resume/file', { method: 'DELETE' }),
   signup: (values) => api('/auth/signup', { method: 'POST', body: JSON.stringify(values) }),
   adminLogin: (values) =>
@@ -60,7 +63,7 @@ export const apiClient = {
   uploadResume: (file) => {
     const body = new FormData();
     body.append('file', file);
-    return api('/admin/resume/file', { method: 'POST', body });
+    return api('/admin/resumes', { method: 'POST', body, timeoutMs: 120000 });
   },
   resume: () => api('/public/resume'),
   bootstrap: () => api('/public/bootstrap'),

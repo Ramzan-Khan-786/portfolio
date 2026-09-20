@@ -37,9 +37,9 @@ export default function ProfilePage() {
         <aside className="profile-identity">
           <div className="dossier-avatar">
             <ContentImage
-              src={profile.profileImage}
+              src={profile.profileMedia?.url || profile.profileImage}
               initials={profile.initials}
-              alt={profile.name}
+              alt={profile.profileMedia?.altText || profile.name}
             />
           </div>
           <h2>{profile.name}</h2>

@@ -4,6 +4,7 @@ import { apiClient } from '../../lib/api.js';
 import { usePortfolio } from '../../context/PortfolioContext.jsx';
 import { StatePanel } from '../../components/Ui.jsx';
 import FormFields from './FormFields.jsx';
+import useUnsavedChanges from '../../hooks/useUnsavedChanges.js';
 import { profileFields, toForm, toPayload } from './config.js';
 export default function ProfileEditor({ notify }) {
   const { refresh } = usePortfolio();
@@ -12,13 +13,14 @@ export default function ProfileEditor({ notify }) {
   const [fieldErrors, setFieldErrors] = useState({});
   const [busy, setBusy] = useState(false);
   const [attempt, setAttempt] = useState(0);
+  const { markSaved } = useUnsavedChanges(values);
   useEffect(() => {
     let active = true;
     setError('');
     apiClient
       .get('profile')
       .then((data) => {
-        if (active) setValues(toForm(data, profileFields));
+        if (active) { const value = toForm(data, profileFields); setValues(value); markSaved(value); }
       })
       .catch((failure) => {
         if (active) setError(failure.message);
@@ -26,7 +28,7 @@ export default function ProfileEditor({ notify }) {
     return () => {
       active = false;
     };
-  }, [attempt]);
+  }, [attempt, markSaved]);
   async function save(event) {
     event.preventDefault();
     setBusy(true);
@@ -34,6 +36,7 @@ export default function ProfileEditor({ notify }) {
     setFieldErrors({});
     try {
       await apiClient.save('profile', toPayload(values, profileFields));
+      markSaved(values);
       notify('Profile saved.');
       refresh();
     } catch (failure) {
@@ -69,7 +72,7 @@ export default function ProfileEditor({ notify }) {
               fields={profileFields}
               values={values}
               errors={fieldErrors}
-              onChange={(name, value) => setValues({ ...values, [name]: value })}
+              onChange={(name, value) => setValues((current) => ({ ...current, [name]: value }))}
             />
           </fieldset>
           <div className="mt-6 flex justify-end">

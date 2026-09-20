@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { Download, ExternalLink, FileText } from 'lucide-react';
 import { usePortfolio } from '../context/PortfolioContext.jsx';
 import { apiClient, assetUrl } from '../lib/api.js';
@@ -8,11 +8,12 @@ import Metadata from '../components/Metadata.jsx';
 import PageHeading from '../components/PageHeading.jsx';
 import { Timeline } from './ProfilePage.jsx';
 import './ResumePage.css';
+const ResumeViewer = lazy(() => import('../components/ResumeViewer.jsx'));
 export default function ResumePage() {
   const { content } = usePortfolio();
   const [state, setState] = useState({ loading: true }),
     [attempt, setAttempt] = useState(0),
-    [preview, setPreview] = useState(false);
+    [preview, setPreview] = useState(true);
   useEffect(() => {
     let active = true;
     apiClient
@@ -112,15 +113,9 @@ export default function ResumePage() {
         </aside>
         <div className="resume-content">
           {preview && file && (
-            <section className="resume-preview" data-scroll-lock>
-              <iframe src={file} title="Resume PDF preview" />
-              <p>
-                PDF previews depend on your browser.{' '}
-                <a href={file} target="_blank" rel="noopener noreferrer">
-                  Open the original document ↗
-                </a>
-              </p>
-            </section>
+            <Suspense fallback={<StatePanel loading title="Opening PDF viewer" />}>
+              <ResumeViewer url={file} downloadUrl={resume?.downloadEnabled !== false ? (resume?.hasFile ? file + '?download=1' : file) : undefined} />
+            </Suspense>
           )}
           {details.education?.length > 0 && (
             <section>

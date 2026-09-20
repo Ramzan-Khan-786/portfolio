@@ -12,6 +12,7 @@ const fields = [
   'code',
   'errorName',
   'port',
+  'assetId', 'publicId', 'version', 'mode',
 ];
 const categories = ['application', 'http', 'auth', 'admin', 'error'];
 const events = new Set([
@@ -33,6 +34,8 @@ const events = new Set([
   'application.failed',
   'application.error',
   'seed.complete',
+  'media.uploaded', 'media.deleted', 'media.background_removed', 'media.upload_failed', 'media.delete_failed', 'media.cleanup_failed',
+  'resume.uploaded', 'resume.published', 'resume.archived', 'resume.deleted', 'theme.updated',
 ]);
 export function cleanLog(category, event, metadata = {}) {
   const result = {

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { ExternalLink, RefreshCcw, AlertCircle } from 'lucide-react';
 import { safeUrl } from '../../lib/content.js';
-import { ContentLink } from '../../components/Ui.jsx';
+import { ContentImage, ContentLink } from '../../components/Ui.jsx';
 export default function EmbeddedProject({ item }) {
   const configured =
     item.embedUrl ||
@@ -38,7 +38,7 @@ export default function EmbeddedProject({ item }) {
   if (!url || sameOrigin)
     return (
       <div className="showroom-message">
-        <AlertCircle size={25} />
+        {item.fallbackMedia?.url ? <ContentImage src={item.fallbackMedia.url} alt={item.fallbackMedia.altText || item.label + ' preview'} className="showroom-support-image" /> : <AlertCircle size={25} />}
         <p className="eyebrow">Integration unavailable</p>
         <h2>{item.label} isn’t connected yet.</h2>
         <p>
@@ -52,7 +52,7 @@ export default function EmbeddedProject({ item }) {
       </div>
     );
   return (
-    <div className="embed-shell" data-scroll-lock>
+    <div className="embed-shell">
       <div className="embed-toolbar">
         <span>
           <span className="embed-dot" />
@@ -73,7 +73,7 @@ export default function EmbeddedProject({ item }) {
           </button>
         </div>
       </div>
-      <div className="embed-stage">
+      <div className="embed-stage" data-scroll-lock>
         {(state === 'loading' || state === 'timeout') && (
           <div className="embed-notice" role="status">
             {state === 'loading'

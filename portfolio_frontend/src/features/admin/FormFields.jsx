@@ -1,5 +1,6 @@
 import { useId } from 'react';
 import './Forms.css';
+import MediaField, { MediaGallery } from '../media/MediaField.jsx';
 export default function FormFields({ fields, values, errors = {}, projects = [], onChange }) {
   const prefix = useId();
   return (
@@ -13,6 +14,7 @@ export default function FormFields({ fields, values, errors = {}, projects = [],
           options,
           fields: children,
           max = 30,
+          category = 'misc',
           ...validation
         }) => {
           const error = errors[name]?.join(' '),
@@ -23,6 +25,10 @@ export default function FormFields({ fields, values, errors = {}, projects = [],
             'aria-invalid': Boolean(error),
             'aria-describedby': error ? id + '-error' : help ? id + '-help' : undefined,
           };
+          if (type === 'media' || type === 'gallery') {
+            const Component = type === 'gallery' ? MediaGallery : MediaField;
+            return <div className="sm:col-span-2 min-w-0" key={name}><Component label={label} category={category} projectSlug={values.slug || undefined} max={max} value={values[name] || (type === 'gallery' ? [] : null)} onChange={(value) => onChange(name, value)} />{error && <p className="cms-field-error" role="alert">{error}</p>}</div>;
+          }
           if (type === 'repeater') {
             const rows = values[name] || [];
             function move(index, delta) {
